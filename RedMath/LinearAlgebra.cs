@@ -1,0 +1,7 @@
+﻿namespace RedMath
+{
+    class LinearAlgebra
+    {
+
+    }
+}

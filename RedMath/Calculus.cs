@@ -1,0 +1,6 @@
+﻿namespace RedMath
+{
+    class Calculus
+    {
+    }
+}
