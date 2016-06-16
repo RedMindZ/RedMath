@@ -110,23 +110,12 @@
 
         public static bool operator !=(Complex a, Complex b)
         {
-            /*if (((object)a == null) ^ ((object)b == null))
-            {
-                return true;
-            }
-
-            if (((object)a == null) && ((object)b == null))
-            {
-                return false;
-            }
-
-            if (a.Real == b.Real && a.Imaginary == b.Imaginary)
-            {
-                return false;
-            }*/
-
-            //return true;
             return !(a == b);
+        }
+
+        public static implicit operator LinearAlgebra.Vector(Complex a)
+        {
+            return new LinearAlgebra.Vector(a.Real, a.Imaginary);
         }
 
         public override bool Equals(object obj)

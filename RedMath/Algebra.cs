@@ -28,7 +28,7 @@ namespace RedMath
             return Math.Pow(b, x);
         }
 
-        public static ulong Factorial(uint x)
+        public static ulong Factorial(ulong x)
         {
             if (x == 1 || x == 0)
             {
@@ -61,6 +61,7 @@ namespace RedMath
         public static Complex Exponent(Complex z)
         {
             double ePow;
+
             if (z.Real == 0)
             {
                 ePow = 1;
@@ -73,6 +74,7 @@ namespace RedMath
             {
                 ePow = Exponent(z.Real);
             }
+
             return new Complex(ePow * Trigonometry.Cos(z.Imaginary), ePow * Trigonometry.Sin(z.Imaginary));
         }
 
@@ -81,15 +83,15 @@ namespace RedMath
             return IntPower(E, x);
         }
 
-        public static double NaturalLogarithm(double t)
+        public static double NaturalLogarithm(double x)
         {
-            if (t == 0)
+            if (x == 0)
                 return Double.NegativeInfinity;
 
-            if (t == 1)
+            if (x == 1)
                 return 0;
 
-            return Math.Log(t);
+            return Math.Log(x);
 
             /*double sum1 = 0;
             double sum2 = 0;
@@ -318,6 +320,26 @@ namespace RedMath
             }
 
             return sum;
+        }
+
+        public static int CountDigits(int x)
+        {
+            int count = 0;
+
+            x = (int)Absolute(x);
+
+            while (x > 0)
+            {
+                x /= 10;
+                count++;
+            }
+
+            return count;
+        }
+
+        public static int CountDigits(double x)
+        {
+            return x.ToString().Replace(".", "").Length;
         }
     }
 }

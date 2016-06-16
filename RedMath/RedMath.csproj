@@ -33,7 +33,9 @@
     <Compile Include="Algebra.cs" />
     <Compile Include="Calculus.cs" />
     <Compile Include="FFT.cs" />
-    <Compile Include="LinearAlgebra.cs" />
+    <Compile Include="LinearAlgebra\Matrix.cs" />
+    <Compile Include="LinearAlgebra\Vector.cs" />
+    <Compile Include="LinearAlgebra\VectorSpace.cs" />
     <Compile Include="Numerics.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Trigonometry.cs" />
@@ -42,6 +44,7 @@
   <ItemGroup>
     <Reference Include="System" />
   </ItemGroup>
+  <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.

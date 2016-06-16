@@ -123,35 +123,6 @@
             return res;
         }
 
-        protected void arrangeForTransformation(Complex[] arr)
-        {
-            int[] map = new int[arr.Length];
-            int size = 1;
-            int incr = map.Length / (2 * size);
-
-            map[0] = 0;
-
-            for (; size < map.Length; size *= 2, incr = map.Length / (2 * size))
-            {
-                for (int i = 0; i < size; i++)
-                {
-                    map[i + size] = map[i] + incr;
-                }
-            }
-
-            for (int i = 0; i < map.Length; i++)
-            {
-                int k = map[i];
-
-                if (i < k)
-                {
-                    Complex temp = arr[i];
-                    arr[i] = arr[k];
-                    arr[k] = temp;
-                }
-            }
-        }
-
         public Complex[] computeFFT(Complex[] data)
         {
             if (data.Length == 1)
@@ -164,18 +135,6 @@
 
             System.Array.Copy(even, data, even.Length);
             System.Array.Copy(odd, 0, data, halfLength, odd.Length);
-
-            /*for (int i = 0; i < data.Length; i++)
-            {
-                if (i < halfLength)
-                {
-                    data[i] = even[i];
-                }
-                else
-                {
-                    data[i] = odd[i - halfLength];
-                }
-            }*/
 
             Complex ePow;
             Complex t;
@@ -219,29 +178,6 @@
 
                 sliceSize *= 2;
             }*/
-        }
-
-        private void combine(Complex[] data, int first, int last)
-        {
-            int even, odd, half;
-            Complex ePow, wj, x;
-
-            half = (last - first + 1) / 2;
-            ePow = Algebra.Exponent(new Complex(0, Algebra.PI / half));
-            wj = new Complex(1, 0);
-
-            for (int j = 0; j < half; j++)
-            {
-                even = first + j;
-                odd = even + half;
-
-                x = wj * data[odd];
-
-                data[odd] = data[even] - x;
-                data[even] = data[even] + x;
-
-                wj *= ePow;
-            }
         }
     }
 }
