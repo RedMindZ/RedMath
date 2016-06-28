@@ -26,6 +26,58 @@ namespace RedMath.LinearAlgebra
             }
         }
 
+        public bool IsColumnMatrix
+        {
+            get
+            {
+                return Width == 1;
+            }
+        }
+
+        public bool IsRowMatrix
+        {
+            get
+            {
+                return Height == 1;
+            }
+        }
+
+        public bool IsSquareMatrix
+        {
+            get
+            {
+                return Width == Height;
+            }
+        }
+
+        public bool IsIdentity
+        {
+            get
+            {
+                if (!IsSquareMatrix)
+                {
+                    return false;
+                }
+
+                for (int row = 0; row < Height; row++)
+                {
+                    for (int col = 0; col < Width; col++)
+                    {
+                        if (col == row && body[row, col] != 1)
+                        {
+                            return false;
+                        }
+                        else if (col != row && body[row, col] != 0)
+                        {
+                            return false;
+                        }
+                    }
+                }
+
+                return true;
+            }
+        }
+
         public double this[int row, int col]
         {
             get
