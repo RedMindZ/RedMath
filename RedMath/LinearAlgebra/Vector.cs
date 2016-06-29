@@ -280,6 +280,23 @@ namespace RedMath.LinearAlgebra
             return !(a == b);
         }
 
+        public override string ToString()
+        {
+            string res = "";
+
+            for (int i = 0; i < Dimension; i++)
+            {
+                if (Components[i] >= 0 && i > 0)
+                {
+                    res += "+";
+                }
+
+                res += Components[i] + "e(" + i + ")";
+            }
+
+            return res;
+        }
+
         public override bool Equals(object obj)
         {
             if (obj == null || GetType() != obj.GetType())
