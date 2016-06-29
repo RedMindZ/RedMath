@@ -115,6 +115,128 @@ namespace RedMath.LinearAlgebra
             }
         }
 
+        public void Transpose()
+        {
+            double[,] temp = new double[Width, Height];
+
+            for (int i = 0; i < Height; i++)
+            {
+                for (int j = 0; j < Width; j++)
+                {
+                    temp[j, i] = body[i, j];
+                }
+            }
+
+            body = temp;
+        }
+
+        public Vector GetRowVector(int index)
+        {
+            double[] res = new double[Width];
+
+            for (int i = 0; i < res.Length; i++)
+            {
+                res[i] = body[index, i];
+            }
+
+            return new Vector(res);
+        }
+
+        public Vector GetColumnVector(int index)
+        {
+            double[] res = new double[Height];
+
+            for (int i = 0; i < res.Length; i++)
+            {
+                res[i] = body[i, index];
+            }
+
+            return new Vector(res);
+        }
+
+        public static Matrix operator +(Matrix a, Matrix b)
+        {
+            if (a.Width != b.Width || a.Height != b.Height)
+            {
+                return null;
+            }
+
+            double[,] temp = new double[a.Height, a.Width];
+
+            for (int i = 0; i < a.Height; i++)
+            {
+                for (int j = 0; j < a.Width; j++)
+                {
+                    temp[i, j] = a[i, j] + b[i, j];
+                }
+            }
+
+            return new Matrix(temp);
+        }
+
+        public static Matrix operator *(Matrix a, double s)
+        {
+            double[,] temp = new double[a.Height, a.Width];
+
+            for (int i = 0; i < a.Height; i++)
+            {
+                for (int j = 0; j < a.Width; j++)
+                {
+                    temp[i, j] = a[i, j] * s;
+                }
+            }
+
+            return new Matrix(temp);
+        }
+
+        public static Matrix operator *(double s, Matrix a)
+        {
+            double[,] temp = new double[a.Height, a.Width];
+
+            for (int i = 0; i < a.Height; i++)
+            {
+                for (int j = 0; j < a.Width; j++)
+                {
+                    temp[i, j] = a[i, j] * s;
+                }
+            }
+
+            return new Matrix(temp);
+        }
+
+        public static Matrix operator *(Matrix a, Matrix b)
+        {
+            if (a.Width != b.Height)
+            {
+                return null;
+            }
+
+            double[,] temp = new double[a.Height, b.Width];
+            double sum = 0;
+
+            for (int i = 0; i < temp.GetLength(0); i++)
+            {
+                for (int j = 0; j < temp.GetLength(1); j++)
+                {
+                    sum = 0;
+
+                    for (int k = 0; k < a.Width; k++)
+                    {
+                        sum += a[i, k] * b[k, j];
+                    }
+
+                    temp[i, j] = sum;
+                }
+            }
+
+            return new Matrix(temp);
+        }
+
+        public static implicit operator double[,](Matrix m)
+        {
+            return m.body;
+        }
+
         public override string ToString()
         {
             string res = "";

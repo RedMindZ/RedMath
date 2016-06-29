@@ -147,6 +147,18 @@ namespace RedMath.LinearAlgebra
             return a.UnitVector == -this.UnitVector;
         }
 
+        public double Sum()
+        {
+            double sum = 0;
+
+            for (int i = 0; i < Dimension; i++)
+            {
+                sum += this[i];
+            }
+
+            return sum;
+        }
+
         public static Vector operator +(Vector a, Vector b)
         {
             Vector vec = new Vector(Algebra.Max(a.Dimension, b.Dimension));
