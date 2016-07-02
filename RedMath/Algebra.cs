@@ -309,7 +309,7 @@ namespace RedMath
 
         public static Complex IntPower(Complex b, int n)
         {
-            Complex sum = new Complex(1, 1);
+            Complex sum = new Complex(1, 0);
 
             if (n > 0)
             {
