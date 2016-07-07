@@ -115,6 +115,30 @@
 
             return true;
         }
+
+        public static double SequenceSum(double[] seq)
+        {
+            double sum = 0;
+
+            for (int i = 0; i < seq.Length; i++)
+            {
+                sum += seq[i];
+            }
+
+            return sum;
+        }
+
+        public static double SequenceProduct(double[] seq)
+        {
+            double prod = 1;
+
+            for (int i = 0; i < seq.Length; i++)
+            {
+                prod *= seq[i];
+            }
+
+            return prod;
+        }
     }
 
     

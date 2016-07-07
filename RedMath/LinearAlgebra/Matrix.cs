@@ -1,14 +1,18 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace RedMath.LinearAlgebra
 {
     public class Matrix
     {
         protected double[,] body;
+
+        private bool r_Decomposition = true;
+        private bool r_Determinant = true;
+        private bool r_Identity = true;
+
+        private double determinant;
+        private Tuple<Matrix, Matrix> decomposition;
+        private bool identity;
 
         public int Width
         {
@@ -19,6 +23,22 @@ namespace RedMath.LinearAlgebra
         }
 
         public int Height
+        {
+            get
+            {
+                return body.GetLength(0);
+            }
+        }
+
+        public int Columns
+        {
+            get
+            {
+                return body.GetLength(1);
+            }
+        }
+
+        public int Rows
         {
             get
             {
@@ -54,20 +74,51 @@ namespace RedMath.LinearAlgebra
         {
             get
             {
+                if (r_Identity)
+                {
+                    identity = true;
+
+                    if (!IsSquareMatrix)
+                    {
+                        identity = false;
+                    }
+
+                    for (int row = 0; row < Height && identity; row++)
+                    {
+                        for (int col = 0; col < Width && identity; col++)
+                        {
+                            if (col == row && body[row, col] != 1)
+                            {
+                                identity = false;
+                            }
+                            else if (col != row && body[row, col] != 0)
+                            {
+                                identity = false;
+                            }
+                        }
+                    }
+
+                    r_Identity = false;
+                }
+
+                return identity;
+            }
+        }
+
+        public bool IsLowerTriangular
+        {
+            get
+            {
                 if (!IsSquareMatrix)
                 {
                     return false;
                 }
 
-                for (int row = 0; row < Height; row++)
+                for (int i = 0; i < Height; i++)
                 {
-                    for (int col = 0; col < Width; col++)
+                    for (int j = i + 1; j < Width; j++)
                     {
-                        if (col == row && body[row, col] != 1)
-                        {
-                            return false;
-                        }
-                        else if (col != row && body[row, col] != 0)
+                        if (this[i, j] != 0)
                         {
                             return false;
                         }
@@ -75,6 +126,99 @@ namespace RedMath.LinearAlgebra
                 }
 
                 return true;
+            }
+        }
+
+        public bool IsUpperTriangular
+        {
+            get
+            {
+                if (!IsSquareMatrix)
+                {
+                    return false;
+                }
+
+                for (int i = 0; i < Height; i++)
+                {
+                    for (int j = 0; j < i; j++)
+                    {
+                        if (this[i, j] != 0)
+                        {
+                            return false;
+                        }
+                    }
+                }
+
+                return true;
+            }
+        }
+
+        public double[] MainDiagonal
+        {
+            get
+            {
+                double[] seq = new double[(int)Algebra.Min(Height, Width)];
+
+                for (int i = 0; i < seq.Length; i++)
+                {
+                    seq[i] = this[i, i];
+                }
+
+                return seq;
+            }
+        }
+
+        public double[] AntiDiagonal
+        {
+            get
+            {
+                double[] seq = new double[(int)Algebra.Min(Height, Width)];
+
+                for (int i = 0; i < seq.Length; i++)
+                {
+                    seq[i] = this[seq.Length - i - 1, i];
+                }
+
+                return seq;
+            }
+        }
+
+        public Tuple<Matrix, Matrix> Decomposition
+        {
+            get
+            {
+                if (r_Decomposition)
+                {
+                    decomposition = decompose();
+                    r_Decomposition = false;
+                }
+
+                return decomposition;
+            }
+        }
+
+        public double Determinant
+        {
+            get
+            {
+                if (r_Determinant)
+                {
+                    determinant = computeDeterminant();
+                    r_Determinant = false;
+                }
+
+                return determinant;
+            }
+        }
+
+        public Matrix Transposition
+        {
+            get
+            {
+                Matrix m = new Matrix(this);
+                m.Transpose();
+
+                return m;
             }
         }
 
@@ -88,6 +232,10 @@ namespace RedMath.LinearAlgebra
             set
             {
                 body[row, col] = value;
+
+                r_Decomposition = true;
+                r_Determinant = true;
+                r_Identity = true;
             }
         }
 
@@ -100,6 +248,14 @@ namespace RedMath.LinearAlgebra
         public Matrix(int rows, int cols)
         {
             body = new double[rows, cols];
+
+            if (IsSquareMatrix)
+            {
+                for (int i = 0; i < Height; i++)
+                {
+                    body[i, i] = 1;
+                }
+            }
         }
 
         public Matrix(double[,] data)
@@ -128,6 +284,10 @@ namespace RedMath.LinearAlgebra
             }
 
             body = temp;
+
+            r_Decomposition = true;
+            r_Determinant = true;
+            r_Identity = true;
         }
 
         public Vector GetRowVector(int index)
@@ -152,6 +312,51 @@ namespace RedMath.LinearAlgebra
             }
 
             return new Vector(res);
+        }
+
+        private Tuple<Matrix, Matrix> decompose()
+        {
+            if (!IsSquareMatrix)
+            {
+                return null;
+            }
+
+            Matrix lower = new Matrix(Rows, Columns);
+            Matrix upper = new Matrix(Rows, Columns);
+
+            for (int i = 0; i < body.GetLength(0); i++)
+            {
+                for (int j = i; j < body.GetLength(1); j++)
+                {
+                    upper[i, j] = body[i, j];
+                    for (int k = 0; k < i; k++)
+                    {
+                        upper[i, j] = upper[i, j] - lower[i, k] * upper[k, j];
+                    }
+                }
+
+                for (int j = i + 1; j < body.GetLength(1); j++)
+                {
+                    lower[j, i] = this[j, i];
+                    for (int k = 0; k < i; k++)
+                    {
+                        lower[j, i] = lower[j, i] - lower[j, k] * upper[k, i];
+                    }
+                    lower[j, i] = lower[j, i] / upper[i, i];
+                }
+            }
+
+            return new Tuple<Matrix, Matrix>(lower, upper);
+        }
+
+        private double computeDeterminant()
+        {
+            if (!IsSquareMatrix)
+            {
+                return Double.NaN;
+            }
+
+            return Utilitys.SequenceProduct(Decomposition.Item1.MainDiagonal) * Utilitys.SequenceProduct(Decomposition.Item2.MainDiagonal);
         }
 
         public static Matrix operator +(Matrix a, Matrix b)
@@ -232,7 +437,7 @@ namespace RedMath.LinearAlgebra
             return new Matrix(temp);
         }
 
-        public static implicit operator double[,](Matrix m)
+        public static implicit operator double[,] (Matrix m)
         {
             return m.body;
         }
@@ -248,6 +453,8 @@ namespace RedMath.LinearAlgebra
                 for (int col = 0; col < Width; col++)
                 {
                     digits = Algebra.CountDigits(body[row, col]);
+                    digits += body[row, col] < 0 ? 1 : 0;
+
                     if (digits > spaceCount)
                     {
                         spaceCount = digits;
