@@ -339,7 +339,7 @@ namespace RedMath
 
         public static int CountDigits(double x)
         {
-            return x.ToString().Replace(".", "").Length;
+            return x.ToString().Length;
         }
     }
 }

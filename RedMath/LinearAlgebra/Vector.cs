@@ -113,7 +113,7 @@
 
         public Vector(int dim)
         {
-            Components = new double[Dimension];
+            Components = new double[dim];
 
             for (int i = 0; i < dim; i++)
             {
@@ -123,7 +123,7 @@
 
         public Vector(params double[] comp)
         {
-            Components = new double[Dimension];
+            Components = new double[comp.Length];
 
             for (int i = 0; i < comp.Length; i++)
             {
@@ -151,6 +151,18 @@
             }
 
             return sum;
+        }
+
+        public Matrix ToColumnMatrix()
+        {
+            double[,] temp = new double[1, Dimension];
+
+            for (int i = 0; i < Dimension; i++)
+            {
+                temp[0, i] = this[i];
+            }
+
+            return new Matrix(temp);
         }
 
         public static Vector operator +(Vector a, Vector b)
@@ -284,6 +296,11 @@
         public static bool operator !=(Vector a, Vector b)
         {
             return !(a == b);
+        }
+
+        public static implicit operator Vector (double[] arr)
+        {
+            return new Vector(arr);
         }
 
         public override string ToString()

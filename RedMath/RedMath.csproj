@@ -34,6 +34,7 @@
     <Compile Include="Calculus.cs" />
     <Compile Include="FFT.cs" />
     <Compile Include="LinearAlgebra\Matrix.cs" />
+    <Compile Include="LinearAlgebra\MatrixTransformations.cs" />
     <Compile Include="LinearAlgebra\Vector.cs" />
     <Compile Include="LinearAlgebra\VectorSpace.cs" />
     <Compile Include="Numerics.cs" />
