@@ -41,7 +41,7 @@
             Matrix a = A_t * A_t * (1 - Trigonometry.Cos(angle, true));
             Matrix b = A_t * Trigonometry.Sin(angle, true);
 
-            return I * Trigonometry.Cos(angle, true) + axis * axis.Transposition * (1 - Trigonometry.Cos(angle, true)) + A_t * Trigonometry.Sin(angle, true);
+            return I * a + b;
         }
     }
 }
