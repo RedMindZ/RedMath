@@ -24,28 +24,45 @@ namespace RedMathTests
 
             Debug.WriteLine(mat);
             Debug.WriteLine("--->");
-            Debug.WriteLine(mat.computeEcholonForm());
+            Debug.WriteLine(mat.computeEchelonForm());
+            Debug.WriteLine("--->");
+            Debug.WriteLine(mat.ReducedEchelonForm);
             Debug.WriteLine("");
 
             mat[0, 0] = 0;
 
             Debug.WriteLine(mat);
             Debug.WriteLine("--->");
-            Debug.WriteLine(mat.computeEcholonForm());
+            Debug.WriteLine(mat.computeEchelonForm());
+            Debug.WriteLine("--->");
+            Debug.WriteLine(mat.ReducedEchelonForm);
             Debug.WriteLine("");
 
             mat[1, 0] = 0;
 
             Debug.WriteLine(mat);
             Debug.WriteLine("--->");
-            Debug.WriteLine(mat.computeEcholonForm());
+            Debug.WriteLine(mat.computeEchelonForm());
+            Debug.WriteLine("--->");
+            Debug.WriteLine(mat.ReducedEchelonForm);
             Debug.WriteLine("");
 
-            mat[2, 0] = 0;
+            mat[0, 0] = 1;
+            mat[1, 0] = 32;
+            mat[2, 0] = 1024;
+
+            mat[1, 0] = 0;
+            mat[1, 1] = 0;
+            mat[1, 2] = 0;
+            mat[1, 3] = 0;
+            mat[1, 4] = 0;
+            mat[2, 0] = 40;
 
             Debug.WriteLine(mat);
             Debug.WriteLine("--->");
-            Debug.WriteLine(mat.computeEcholonForm());
+            Debug.WriteLine(mat.computeEchelonForm());
+            Debug.WriteLine("--->");
+            Debug.WriteLine(mat.ReducedEchelonForm);
             Debug.WriteLine("");
         }
     }

@@ -1,4 +1,5 @@
 ﻿using RedMath.Structures;
+using RedMath.LinearAlgebra.MatrixOperations;
 using System;
 
 namespace RedMath.LinearAlgebra
@@ -14,11 +15,15 @@ namespace RedMath.LinearAlgebra
         private bool r_CofactorMatrix = true;
         private bool r_Decomposition = true;
         private bool r_Determinant = true;
+        private bool r_EchelonForm = true;
+        private bool r_reducedEchelonForm = true;
         private bool r_Identity = true;
         #endregion
 
         #region Cache Values
         private T determinant;
+        private Matrix<T> echelonForm;
+        private Matrix<T> reducedEchelonForm;
         private Tuple<Matrix<T>, Matrix<T>, Matrix<T>> decomposition;
         private bool identity;
         private Matrix<T> cofactorMatrix;
@@ -199,6 +204,7 @@ namespace RedMath.LinearAlgebra
         }
         #endregion
 
+
         public Tuple<Matrix<T>, Matrix<T>, Matrix<T>> Decomposition
         {
             get
@@ -227,6 +233,36 @@ namespace RedMath.LinearAlgebra
             }
         }
 
+        public Matrix<T> EchelonForm
+        {
+            get
+            {
+                if (r_EchelonForm)
+                {
+                    echelonForm = computeEchelonForm();
+
+                    r_EchelonForm = false;
+                }
+
+                return new Matrix<T>(echelonForm);
+            }
+        }
+
+        public Matrix<T> ReducedEchelonForm
+        {
+            get
+            {
+                if (r_reducedEchelonForm)
+                {
+                    reducedEchelonForm = computeReducedEchelonForm();
+
+                    r_reducedEchelonForm = false;
+                }
+
+                return new Matrix<T>(reducedEchelonForm);
+            }
+        }
+
         public Matrix<T> CofactorMatrix
         {
             get
@@ -237,7 +273,7 @@ namespace RedMath.LinearAlgebra
                     r_CofactorMatrix = false;
                 }
 
-                return cofactorMatrix;
+                return new Matrix<T>(cofactorMatrix);
             }
         }
 
@@ -278,10 +314,7 @@ namespace RedMath.LinearAlgebra
             {
                 data[row, col] = value;
 
-                r_CofactorMatrix = true;
-                r_Decomposition = true;
-                r_Determinant = true;
-                r_Identity = true;
+                setCacheState(true);
             }
         }
 
@@ -332,6 +365,16 @@ namespace RedMath.LinearAlgebra
         }
         #endregion
 
+        private void setCacheState(bool state)
+        {
+            r_CofactorMatrix = state;
+            r_Decomposition = state;
+            r_Determinant = state;
+            r_EchelonForm = state;
+            r_reducedEchelonForm = state;
+            r_Identity = state;
+        }
+
         public Matrix<T> Submatrix(int row, int col)
         {
             int x = 0;
@@ -376,10 +419,7 @@ namespace RedMath.LinearAlgebra
 
             data = temp;
 
-            r_CofactorMatrix = true;
-            r_Decomposition = true;
-            r_Determinant = true;
-            r_Identity = true;
+            setCacheState(true);
         }
 
         public Vector<T> GetRowVector(int index)
@@ -431,6 +471,8 @@ namespace RedMath.LinearAlgebra
             }
 
             data = temp;
+
+            setCacheState(true);
         }
 
         public void InsertRowVector(Vector<T> row, int index)
@@ -465,6 +507,8 @@ namespace RedMath.LinearAlgebra
             }
 
             data = temp;
+
+            setCacheState(true);
         }
 
         public void AppendColumnVector(Vector<T> col)
@@ -492,6 +536,8 @@ namespace RedMath.LinearAlgebra
             }
 
             data = temp;
+
+            setCacheState(true);
         }
 
         public void InsertColumnVector(Vector<T> col, int index)
@@ -526,6 +572,8 @@ namespace RedMath.LinearAlgebra
             }
 
             data = temp;
+
+            setCacheState(true);
         }
 
         public T Minor(int row, int col)
@@ -579,19 +627,19 @@ namespace RedMath.LinearAlgebra
             int index1 = 0;
             int index2 = 0;
 
-            for (int i = Decomposition.Item1.Height - 2; i < Decomposition.Item1.Height; i++)
+            for (int i = 0; i < Decomposition.Item1.Width; i++)
             {
-                for (int j = 0; j < Decomposition.Item1.Width; j++)
+                if (this[Decomposition.Item1.Height - 2, i].Equals(fieldOne))
                 {
-                    if (this[i, j].Equals(fieldOne) && i == Decomposition.Item1.Height - 2)
-                    {
-                        index1 = j;
-                    }
+                    index1 = i;
+                }
+            }
 
-                    if (this[i, j].Equals(fieldOne) && i == Decomposition.Item1.Height - 1)
-                    {
-                        index2 = j;
-                    }
+            for (int j = 0; j < Decomposition.Item1.Width; j++)
+            {
+                if (this[Decomposition.Item1.Height - 1, j].Equals(fieldOne))
+                {
+                    index2 = j;
                 }
             }
 
@@ -600,23 +648,25 @@ namespace RedMath.LinearAlgebra
             return swaps.Multiply(Utilitys.SequenceProduct(Decomposition.Item2.MainDiagonal).Multiply(Utilitys.SequenceProduct(Decomposition.Item3.MainDiagonal)));
         }
 
-        public Matrix<T> computeEcholonForm()
+        public Matrix<T> computeEchelonForm()
         {
             Matrix<T> temp = new Matrix<T>(this);
 
             bool isZeroColumn = false;
 
+            int rowOffset = 0;
+
             for (int col = 0; col < Math.Min(temp.Rows, temp.Columns); col++)
             {
                 isZeroColumn = false;
-                if (temp[col, col].Equals(fieldZero))
+                if (temp[col - rowOffset, col].Equals(fieldZero))
                 {
                     isZeroColumn = true;
-                    for (int row = col + 1; row < temp.Height; row++)
+                    for (int row = col + 1 - rowOffset; row < temp.Height; row++)
                     {
                         if (!temp[row, col].Equals(fieldZero))
                         {
-                            temp.swapRows(row, col);
+                            new SwapRows<T>(row, col).ApplyTo(temp);
                             isZeroColumn = false;
                             break;
                         }
@@ -625,44 +675,54 @@ namespace RedMath.LinearAlgebra
 
                 if (isZeroColumn)
                 {
+                    rowOffset++;
                     continue;
                 }
 
-                temp.multiplyRowByScalar(col, temp[col, col].MultiplicativeInverse);
+                new MultiplyRowByScalar<T>(col - rowOffset, temp[col - rowOffset, col].MultiplicativeInverse).ApplyTo(temp);
 
-                for (int row = col + 1; row < temp.Rows; row++)
+                for (int row = col + 1 - rowOffset; row < temp.Rows; row++)
                 {
-                    temp.addRowMultiple(temp[row, col].AdditiveInverse, col, row);
+                    new AddRowMultiple<T>(col - rowOffset, row, temp[row, col].AdditiveInverse).ApplyTo(temp);
                 }
             }
 
             return temp;
         }
 
-        private void swapRows(int firstRowIndex, int secondRowIndex)
+        public Matrix<T> computeReducedEchelonForm()
         {
-            for (int i = 0; i < this.Width; i++)
-            {
-                T temp = this[firstRowIndex, i];
-                this[firstRowIndex, i] = this[secondRowIndex, i];
-                this[secondRowIndex, i] = temp;
-            }
-        }
+            Matrix<T> temp = EchelonForm;
 
-        private void multiplyRowByScalar(int targetRowIndex, T scalar)
-        {
-            for (int i = 0; i < this.Width; i++)
-            {
-                this[targetRowIndex, i] = this[targetRowIndex, i].Multiply(scalar);
-            }
-        }
+            bool isZeroRow = false;
 
-        private void addRowMultiple(T baseRowMultiplier, int baseRowIndex, int targetRowIndex)
-        {
-            for (int i = 0; i < this.Width; i++)
+            int entryIndex = 0;
+
+            for (int baseRow = temp.Rows - 1; baseRow >= 0; baseRow--)
             {
-                this[targetRowIndex, i] = this[targetRowIndex, i].Add(this[baseRowIndex, i].Multiply(baseRowMultiplier));
+                isZeroRow = true;
+                for (int col = 0; col < temp.Rows; col++)
+                {
+                    if (temp[baseRow, col].Equals(fieldOne))
+                    {
+                        entryIndex = col;
+                        isZeroRow = false;
+                        break;
+                    }
+                }
+
+                if (isZeroRow)
+                {
+                    continue;
+                }
+
+                for (int currentRow = 0; currentRow < baseRow; currentRow++)
+                {
+                    new AddRowMultiple<T>(baseRow, currentRow, temp[currentRow, entryIndex].AdditiveInverse).ApplyTo(temp);
+                }
             }
+
+            return temp;
         }
 
         #region Operators
