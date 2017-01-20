@@ -1,4 +1,7 @@
-﻿namespace RedMath
+﻿using RedMath.Numerics;
+using System;
+
+namespace RedMath
 {
     public class FFT
     {
@@ -138,11 +141,11 @@
 
             Complex ePow;
             Complex t;
-            double Im = -2 * Algebra.PI / data.Length;
+            double Im = -2 * Math.PI / data.Length;
             for (int i = 0; i < halfLength; i++)
             {
                 t = data[i];
-                ePow = Algebra.Exponent(new Complex(0, Im * i)) * data[i + halfLength];
+                ePow = Algebra.ComplexExp(new Complex(0, Im * i)) * data[i + halfLength];
                 data[i] = t + ePow;
                 data[i + halfLength] = t - ePow;
             }

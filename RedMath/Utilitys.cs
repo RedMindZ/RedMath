@@ -1,12 +1,15 @@
-﻿namespace RedMath
+﻿using RedMath.LinearAlgebra;
+using RedMath.Structures;
+
+namespace RedMath
 {
     public delegate double RealFunctionPlot(double[] args);
 
     public static class Utilitys
     {
-        public static LinearAlgebra.VectorSpace Plot(RealFunctionPlot plotter, int[] min, int[] max)
+        public static Vector<Real>[] Plot(RealFunctionPlot plotter, int[] min, int[] max)
         {
-            LinearAlgebra.VectorSpace results;
+            Vector<Real>[] results;
             int resultsCount;
             int currentIndex = 0;
 
@@ -17,8 +20,8 @@
 
             resultsCount = IndicesToInt(loopLimit, loopLimit);
 
-            results = new LinearAlgebra.VectorSpace(resultsCount);
-            for (int i = 0; i < resultsCount; i++) { results[i] = new LinearAlgebra.Vector(max.Length + 1); }
+            results = new Vector<Real>[resultsCount];
+            for (int i = 0; i < resultsCount; i++) { results[i] = new Vector<Real>(max.Length + 1); }
 
             double[] values = new double[indices.Length];
 
@@ -128,16 +131,26 @@
             return sum;
         }
 
-        public static double SequenceProduct(double[] seq)
+        public static T SequenceProduct<T>(T[] seq) where T : Field<T>, new()
         {
-            double prod = 1;
+            T prod = new T().One;
 
             for (int i = 0; i < seq.Length; i++)
             {
-                prod *= seq[i];
+                prod = prod.Multiply(seq[i]);
             }
 
             return prod;
+        }
+
+        public static int CountDigits(double x)
+        {
+            return x.ToString().Length;
+        }
+
+        public static int CountDigits<T>(Field<T> x) where T : new()
+        {
+            return x.ToString().Length;
         }
     }
 

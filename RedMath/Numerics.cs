@@ -1,11 +1,10 @@
-﻿namespace RedMath
-{
-    public class Numerics
-    {
-        
-    }
+﻿using System;
+using RedMath.Structures;
+using RedMath.LinearAlgebra;
 
-    public class Complex
+namespace RedMath.Numerics
+{
+    public class Complex : Field<Complex>
     {
         public double Real;
         public double Imaginary;
@@ -14,8 +13,8 @@
         {
             get
             {
-                double r = Algebra.SquareRoot((Real + Algebra.SquareRoot(Real * Real + Imaginary * Imaginary)) / 2);
-                double i = Algebra.Sign(Imaginary) * Algebra.SquareRoot((-Real + Algebra.SquareRoot(Real * Real + Imaginary * Imaginary)) / 2);
+                double r = Math.Sqrt((Real + Math.Sqrt(Real * Real + Imaginary * Imaginary)) / 2);
+                double i = Math.Sign(Imaginary) * Math.Sqrt((-Real + Math.Sqrt(Real * Real + Imaginary * Imaginary)) / 2);
 
                 return new Complex(r, i);
             }
@@ -33,7 +32,7 @@
         {
             get
             {
-                return Algebra.SquareRoot(Real * Real + Imaginary * Imaginary);
+                return Math.Sqrt(Real * Real + Imaginary * Imaginary);
             }
         }
 
@@ -41,7 +40,39 @@
         {
             get
             {
-                return Trigonometry.Arctan2(Real, Imaginary);
+                return Math.Atan2(Real, Imaginary);
+            }
+        }
+
+        public override Complex Zero
+        {
+            get
+            {
+                return new Complex(0, 0);
+            }
+        }
+
+        public override Complex One
+        {
+            get
+            {
+                return new Complex(1, 0);
+            }
+        }
+
+        public override Complex AdditiveInverse
+        {
+            get
+            {
+                return -this;
+            }
+        }
+
+        public override Complex MultiplicativeInverse
+        {
+            get
+            {
+                return this.Reciprocal;
             }
         }
 
@@ -88,6 +119,11 @@
             return new Complex((a.Real * b.Real + a.Imaginary * b.Imaginary) / (b.Real * b.Real + b.Imaginary * b.Imaginary), (a.Imaginary * b.Real - a.Real * b.Imaginary) / (b.Real * b.Real + b.Imaginary * b.Imaginary));
         }
 
+        public static Complex operator -(Complex a)
+        {
+            return new Complex(-a.Real, -a.Imaginary);
+        }
+
         public static bool operator ==(Complex a, Complex b)
         {
             if (((object)a == null) ^ ((object)b == null))
@@ -113,9 +149,9 @@
             return !(a == b);
         }
 
-        public static implicit operator LinearAlgebra.Vector(Complex a)
+        public static implicit operator Vector<Real>(Complex a)
         {
-            return new LinearAlgebra.Vector(a.Real, a.Imaginary);
+            return new Vector<Real>(a.Real, a.Imaginary);
         }
 
         public override bool Equals(object obj)
@@ -128,6 +164,16 @@
             Complex instance = (Complex)obj;
 
             if (this.Real == instance.Real && this.Imaginary == instance.Imaginary)
+            {
+                return true;
+            }
+
+            return false;
+        }
+
+        public override bool Equals(Complex other)
+        {
+            if (this.Real == other.Real && this.Imaginary == other.Imaginary)
             {
                 return true;
             }
@@ -150,6 +196,16 @@
             {
                 return Real.ToString("0.000") + Imaginary.ToString("0.000") + "i";
             }
+        }
+
+        public override Complex Add(Complex element)
+        {
+            return this + element;
+        }
+
+        public override Complex Multiply(Complex element)
+        {
+            return this * element;
         }
     }
 }

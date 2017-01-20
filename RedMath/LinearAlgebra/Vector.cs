@@ -1,62 +1,89 @@
-﻿namespace RedMath.LinearAlgebra
+﻿using RedMath.Structures;
+using System;
+
+namespace RedMath.LinearAlgebra
 {
-    public class Vector
+    public class Vector<T> where T : Field<T>, new()
     {
-        double[] Components
-        {
-            get; set;
-        }
+        private T[] components;
 
         public int Dimension
         {
             get
             {
-                return Components.Length;
-            }
-        }
-
-        public double X
-        {
-            get
-            {
-                return Components[0];
-            }
-        }
-
-        public double Y
-        {
-            get
-            {
-                return Components[1];
-            }
-        }
-
-        public double Z
-        {
-            get
-            {
-                return Components[2];
-            }
-        }
-
-        public double W
-        {
-            get
-            {
-                return Components[3];
-            }
-        }
-
-        public double Last
-        {
-            get
-            {
-                return Components[Components.Length - 1];
+                return components.Length;
             }
 
             set
             {
-                Components[Components.Length - 1] = value;
+                if (value < Dimension)
+                {
+                    T[] temp = new T[value];
+
+                    for (int i = 0; i < value; i++)
+                    {
+                        temp[i] = components[i];
+                    }
+
+                    components = temp;
+                }
+
+                if (value > Dimension)
+                {
+                    T[] temp = new T[value];
+
+                    for (int i = 0; i < Dimension; i++)
+                    {
+                        temp[i] = components[i];
+                    }
+
+                    components = temp;
+                }
+            }
+        }
+
+        public T X
+        {
+            get
+            {
+                return components[0];
+            }
+        }
+
+        public T Y
+        {
+            get
+            {
+                return components[1];
+            }
+        }
+
+        public T Z
+        {
+            get
+            {
+                return components[2];
+            }
+        }
+
+        public T W
+        {
+            get
+            {
+                return components[3];
+            }
+        }
+
+        public T Last
+        {
+            get
+            {
+                return components[components.Length - 1];
+            }
+
+            set
+            {
+                components[components.Length - 1] = value;
             }
         }
 
@@ -64,218 +91,221 @@
         {
             get
             {
-                double sum = 0;
-
-                for (int i = 0; i < Dimension; i++)
+                if (this is Vector<Real>)
                 {
-                    sum += Algebra.IntPower(this[i], 2);
-                }
+                    double sum = 0;
 
-                return Algebra.SquareRoot(sum);
+                    for (int i = 0; i < Dimension; i++)
+                    {
+                        sum += (this as Vector<Real>)[i].Multiply((this as Vector<Real>)[i]);
+                    }
+
+                    return Math.Sqrt(sum);
+                }
+                else
+                {
+                    return double.NaN;
+                }
             }
         }
 
-        public Vector Opposite
+        public Vector<T> Opposite
         {
             get
             {
-                Vector vec = new Vector(Components);
+                Vector<T> vec = new Vector<T>(components);
 
                 for (int i = 0; i < vec.Dimension; i++)
                 {
-                    vec[i] = -vec[i];
+                    vec[i] = vec[i].AdditiveInverse;
                 }
 
                 return vec;
             }
         }
 
-        public Vector UnitVector
-        {
-            get
-            {
-                return this / Magnitude;
-            }
-        }
+        
 
-        public double this[int index]
+        public T this[int index]
         {
             get
             {
-                return Components[index];
+                return components[index];
             }
 
             set
             {
-                Components[index] = value;
+                components[index] = value;
             }
         }
 
         public Vector(int dim)
         {
-            Components = new double[dim];
+            components = new T[dim];
 
             for (int i = 0; i < dim; i++)
             {
-                Components[i] = 0;
+                components[i] = new T();
             }
         }
 
-        public Vector(params double[] comp)
+        public Vector(params T[] comp)
         {
-            Components = new double[comp.Length];
+            components = new T[comp.Length];
 
             for (int i = 0; i < comp.Length; i++)
             {
-                Components[i] = comp[i];
+                components[i] = comp[i];
             }
         }
-
-        public bool IsParallel(Vector a)
+        
+        public T Sum()
         {
-            return a.UnitVector == this.UnitVector;
-        }
-
-        public bool IsAntiParallel(Vector a)
-        {
-            return a.UnitVector == -this.UnitVector;
-        }
-
-        public double Sum()
-        {
-            double sum = 0;
+            T sum = new T();
 
             for (int i = 0; i < Dimension; i++)
             {
-                sum += this[i];
+                sum = sum.Add(this[i]);
             }
 
             return sum;
         }
 
-        public Matrix ToColumnMatrix()
+        public Matrix<T> ToRowMatrix()
         {
-            double[,] temp = new double[1, Dimension];
+            T[,] temp = new T[1, Dimension];
 
             for (int i = 0; i < Dimension; i++)
             {
                 temp[0, i] = this[i];
             }
 
-            return new Matrix(temp);
+            return new Matrix<T>(temp);
         }
 
-        public static Vector operator +(Vector a, Vector b)
+        public Matrix<T> ToColumnMatrix()
         {
-            Vector vec = new Vector(Algebra.Max(a.Dimension, b.Dimension));
+            T[,] temp = new T[Dimension, 1];
+
+            for (int i = 0; i < Dimension; i++)
+            {
+                temp[i, 0] = this[i];
+            }
+
+            return new Matrix<T>(temp);
+        }
+
+        public static Vector<T> operator +(Vector<T> a, Vector<T> b)
+        {
+            Vector<T> vec = new Vector<T>((int)Math.Max(a.Dimension, b.Dimension));
 
             for (int i = 0; i < vec.Dimension; i++)
             {
                 if (i < a.Dimension)
                 {
-                    vec[i] += a[i];
+                    vec[i] = vec[i].Add(a[i]);
                 }
 
                 if (i < b.Dimension)
                 {
-                    vec[i] += b[i];
+                    vec[i] = vec[i].Add(b[i]);
                 }
             }
 
             return vec;
         }
 
-        public static Vector operator -(Vector a)
+        public static Vector<T> operator -(Vector<T> a)
         {
             return a.Opposite;
         }
 
-        public static Vector operator -(Vector a, Vector b)
+        public static Vector<T> operator -(Vector<T> a, Vector<T> b)
         {
-            Vector vec = new Vector(Algebra.Max(a.Dimension, b.Dimension));
+            Vector<T> vec = new Vector<T>((int)Math.Max(a.Dimension, b.Dimension));
 
             for (int i = 0; i < vec.Dimension; i++)
             {
                 if (i < a.Dimension)
                 {
-                    vec[i] += a[i];
+                    vec[i] = vec[i].Add(a[i]);
                 }
 
                 if (i < b.Dimension)
                 {
-                    vec[i] -= b[i];
+                    vec[i] = vec[i].Subtract(b[i]);
                 }
             }
 
             return vec;
         }
 
-        public static Vector operator *(Vector a, double d)
+        public static Vector<T> operator *(Vector<T> a, T d)
         {
-            Vector vec = new Vector(a.Components);
+            Vector<T> vec = new Vector<T>(a.components);
 
             for (int i = 0; i < vec.Dimension; i++)
             {
-                vec[i] *= d;
+                vec[i] = vec[i].Multiply(d);
             }
 
             return vec;
         }
 
-        public static Vector operator *(double d, Vector a)
+        public static Vector<T> operator *(T d, Vector<T> a)
         {
-            Vector vec = new Vector(a.Components);
+            Vector<T> vec = new Vector<T>(a.components);
 
             for (int i = 0; i < vec.Dimension; i++)
             {
-                vec[i] *= d;
+                vec[i] = vec[i].Multiply(d);
             }
 
             return vec;
         }
 
-        public static Vector operator /(Vector a, double d)
+        public static Vector<T> operator /(Vector<T> a, T d)
         {
-            Vector vec = new Vector(a.Components);
+            Vector<T> vec = new Vector<T>(a.components);
 
             for (int i = 0; i < vec.Dimension; i++)
             {
-                vec[i] /= d;
+                vec[i] = vec[i].Divide(d);
             }
 
             return vec;
         }
 
-        public static Vector operator /(double d, Vector a)
+        public static Vector<T> operator /(T d, Vector<T> a)
         {
-            Vector vec = new Vector(a.Components);
+            Vector<T> vec = new Vector<T>(a.components);
 
             for (int i = 0; i < vec.Dimension; i++)
             {
-                vec[i] /= d;
+                vec[i] = vec[i].Divide(d);
             }
 
             return vec;
         }
 
-        public static double DotProduct(Vector a, Vector b)
+        public static T DotProduct(Vector<T> a, Vector<T> b)
         {
-            double sum = 0;
+            T sum = new T().Zero;
 
-            for (int i = 0; i < Algebra.Min(a.Dimension, b.Dimension); i++)
+            for (int i = 0; i < Math.Min(a.Dimension, b.Dimension); i++)
             {
-                sum += a[i] * b[i];
+                sum.Add(a[i].Multiply(b[i]));
             }
 
             return sum;
         }
 
-        public double DotProduct(Vector a)
+        public T DotProduct(Vector<T> a)
         {
             return DotProduct(this, a);
         }
 
-        public static bool operator ==(Vector a, Vector b)
+        public static bool operator ==(Vector<T> a, Vector<T> b)
         {
             if (a.Dimension != b.Dimension)
             {
@@ -293,29 +323,38 @@
             return true;
         }
 
-        public static bool operator !=(Vector a, Vector b)
+        public static bool operator !=(Vector<T> a, Vector<T> b)
         {
             return !(a == b);
         }
 
-        public static implicit operator Vector (double[] arr)
+        public static implicit operator T[] (Vector<T> vec)
         {
-            return new Vector(arr);
+            T[] temp = new T[vec.Dimension];
+
+            for (int i = 0; i < temp.Length; i++)
+            {
+                temp[i] = vec[i];
+            }
+
+            return temp;
         }
 
         public override string ToString()
         {
-            string res = "";
+            string res = "(";
 
             for (int i = 0; i < Dimension; i++)
             {
-                if (Components[i] >= 0 && i > 0)
-                {
-                    res += "+";
-                }
+                res += components[i];
 
-                res += Components[i] + "e(" + i + ")";
+                if (i < Dimension - 1)
+                {
+                    res += ", ";
+                }
             }
+
+            res += ")";
 
             return res;
         }
@@ -327,7 +366,7 @@
                 return false;
             }
 
-            Vector vec = obj as Vector;
+            Vector<T> vec = obj as Vector<T>;
 
             if (vec.Dimension != this.Dimension)
             {
@@ -351,10 +390,10 @@
 
             for (int i = 0; i < Dimension; i++)
             {
-                hash += (int)this[i];
+                hash += this[i].GetHashCode();
             }
 
-            return hash;
+            return (int)Magnitude;
         }
     }
 }
