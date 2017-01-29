@@ -145,7 +145,7 @@ namespace RedMath.LinearAlgebra
 
             for (int i = 0; i < dim; i++)
             {
-                components[i] = new T();
+                components[i] = new T().Zero;
             }
         }
 
@@ -161,7 +161,7 @@ namespace RedMath.LinearAlgebra
         
         public T Sum()
         {
-            T sum = new T();
+            T sum = new T().Zero;
 
             for (int i = 0; i < Dimension; i++)
             {

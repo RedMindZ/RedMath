@@ -1,6 +1,7 @@
 ﻿using RedMath.Structures;
 using RedMath.LinearAlgebra.MatrixOperations;
 using System;
+using System.Collections.Generic;
 
 namespace RedMath.LinearAlgebra
 {
@@ -16,15 +17,17 @@ namespace RedMath.LinearAlgebra
         private bool r_Decomposition = true;
         private bool r_Determinant = true;
         private bool r_EchelonForm = true;
-        private bool r_reducedEchelonForm = true;
+        private bool r_ReducedEchelonForm = true;
         private bool r_Identity = true;
         #endregion
 
         #region Cache Values
         private T determinant;
+        private List<MatrixOpertaion<T>> echelonFormOperations;
+        private List<MatrixOpertaion<T>> reducedEchelonFormOperations;
         private Matrix<T> echelonForm;
         private Matrix<T> reducedEchelonForm;
-        private Tuple<Matrix<T>, Matrix<T>, Matrix<T>> decomposition;
+        private Tuple<Matrix<T>, Matrix<T>, RowPermutation<T>> decomposition;
         private bool identity;
         private Matrix<T> cofactorMatrix;
         #endregion
@@ -205,7 +208,7 @@ namespace RedMath.LinearAlgebra
         #endregion
 
 
-        public Tuple<Matrix<T>, Matrix<T>, Matrix<T>> Decomposition
+        public Tuple<Matrix<T>, Matrix<T>, RowPermutation<T>> Decomposition
         {
             get
             {
@@ -233,6 +236,36 @@ namespace RedMath.LinearAlgebra
             }
         }
 
+        public List<MatrixOpertaion<T>> EchelonFormReductionOperations
+        {
+            get
+            {
+                if (r_EchelonForm)
+                {
+                    echelonForm = computeEchelonForm();
+
+                    r_EchelonForm = false;
+                }
+
+                return new List<MatrixOpertaion<T>>(echelonFormOperations);
+            }
+        }
+
+        public List<MatrixOpertaion<T>> ReducedEchelonFormReductionOperations
+        {
+            get
+            {
+                if (r_ReducedEchelonForm)
+                {
+                    reducedEchelonForm = computeReducedEchelonForm();
+
+                    r_ReducedEchelonForm = false;
+                }
+
+                return new List<MatrixOpertaion<T>>(reducedEchelonFormOperations);
+            }
+        }
+
         public Matrix<T> EchelonForm
         {
             get
@@ -252,11 +285,11 @@ namespace RedMath.LinearAlgebra
         {
             get
             {
-                if (r_reducedEchelonForm)
+                if (r_ReducedEchelonForm)
                 {
                     reducedEchelonForm = computeReducedEchelonForm();
 
-                    r_reducedEchelonForm = false;
+                    r_ReducedEchelonForm = false;
                 }
 
                 return new Matrix<T>(reducedEchelonForm);
@@ -333,7 +366,17 @@ namespace RedMath.LinearAlgebra
             {
                 for (int i = 0; i < Height; i++)
                 {
-                    data[i, i] = new T().One;
+                    for (int j = 0; j < Width; j++)
+                    {
+                        if (i == j)
+                        {
+                            data[i, j] = new T().One; 
+                        }
+                        else
+                        {
+                            data[i, j] = new T().Zero;
+                        }
+                    }
                 }
             }
         }
@@ -371,7 +414,7 @@ namespace RedMath.LinearAlgebra
             r_Decomposition = state;
             r_Determinant = state;
             r_EchelonForm = state;
-            r_reducedEchelonForm = state;
+            r_ReducedEchelonForm = state;
             r_Identity = state;
         }
 
@@ -606,9 +649,47 @@ namespace RedMath.LinearAlgebra
             return m;
         }
 
-        private Tuple<Matrix<T>, Matrix<T>, Matrix<T>> computeDecomposition()
+        private Tuple<Matrix<T>, Matrix<T>, RowPermutation<T>> computeDecomposition()
         {
-            return null;
+            Matrix<T> workMat = new Matrix<T>(this);
+
+            Matrix<T> U = new Matrix<T>(Math.Min(workMat.Rows, workMat.Columns), workMat.Columns);
+            Matrix<T> L = new Matrix<T>(workMat.Rows, Math.Min(workMat.Rows, workMat.Columns));
+            RowPermutation<T> P = new RowPermutation<T>();
+
+            U = workMat.EchelonForm;
+
+            List<MatrixOpertaion<T>> reductionOperations = workMat.EchelonFormReductionOperations;
+
+            for (int i = reductionOperations.Count - 1; i >= 0; i--)
+            {
+                reductionOperations[i].InverseApplyTo(L);
+            }
+
+            for (int i = 0; i < L.Height; i++)
+            {
+                int j = L.Width - 1;
+                for (; j >= 0; j--)
+                {
+                    if (!L[i, j].Equals(fieldZero))
+                    {
+                        break;
+                    }
+                }
+
+                if (j == L.Width)
+                {
+                    P.IndexList.Add(j + i); 
+                }
+                else
+                {
+                    P.IndexList.Add(j);
+                }
+            }
+
+            P.ApplyTo(L);
+
+            return new Tuple<Matrix<T>, Matrix<T>, RowPermutation<T>>(L, U, P);
         }
 
         private T computeDeterminant()
@@ -645,12 +726,13 @@ namespace RedMath.LinearAlgebra
 
             swaps = index1 > index2 ? fieldOne.AdditiveInverse : fieldOne;
 
-            return swaps.Multiply(Utilitys.SequenceProduct(Decomposition.Item2.MainDiagonal).Multiply(Utilitys.SequenceProduct(Decomposition.Item3.MainDiagonal)));
+            return swaps.Multiply(Utilitys.SequenceProduct(Decomposition.Item1.MainDiagonal).Multiply(Utilitys.SequenceProduct(Decomposition.Item2.MainDiagonal)));
         }
 
-        public Matrix<T> computeEchelonForm()
+        private Matrix<T> computeEchelonForm()
         {
             Matrix<T> temp = new Matrix<T>(this);
+            List<MatrixOpertaion<T>> reductionOperations = new List<MatrixOpertaion<T>>();
 
             bool isZeroColumn = false;
 
@@ -666,7 +748,8 @@ namespace RedMath.LinearAlgebra
                     {
                         if (!temp[row, col].Equals(fieldZero))
                         {
-                            new SwapRows<T>(row, col).ApplyTo(temp);
+                            reductionOperations.Add(new SwapRows<T>(row, col));
+                            reductionOperations[reductionOperations.Count - 1].ApplyTo(temp);
                             isZeroColumn = false;
                             break;
                         }
@@ -679,20 +762,25 @@ namespace RedMath.LinearAlgebra
                     continue;
                 }
 
-                new MultiplyRowByScalar<T>(col - rowOffset, temp[col - rowOffset, col].MultiplicativeInverse).ApplyTo(temp);
+                reductionOperations.Add(new MultiplyRowByScalar<T>(col - rowOffset, temp[col - rowOffset, col].MultiplicativeInverse));
+                reductionOperations[reductionOperations.Count - 1].ApplyTo(temp);
 
                 for (int row = col + 1 - rowOffset; row < temp.Rows; row++)
                 {
-                    new AddRowMultiple<T>(col - rowOffset, row, temp[row, col].AdditiveInverse).ApplyTo(temp);
+                    reductionOperations.Add(new AddRowMultiple<T>(col - rowOffset, row, temp[row, col].AdditiveInverse));
+                    reductionOperations[reductionOperations.Count - 1].ApplyTo(temp);
                 }
             }
+
+            echelonFormOperations = reductionOperations;
 
             return temp;
         }
 
-        public Matrix<T> computeReducedEchelonForm()
+        private Matrix<T> computeReducedEchelonForm()
         {
             Matrix<T> temp = EchelonForm;
+            List<MatrixOpertaion<T>> reductionOperations = new List<MatrixOpertaion<T>>();
 
             bool isZeroRow = false;
 
@@ -718,9 +806,14 @@ namespace RedMath.LinearAlgebra
 
                 for (int currentRow = 0; currentRow < baseRow; currentRow++)
                 {
-                    new AddRowMultiple<T>(baseRow, currentRow, temp[currentRow, entryIndex].AdditiveInverse).ApplyTo(temp);
+                    reductionOperations.Add(new AddRowMultiple<T>(baseRow, currentRow, temp[currentRow, entryIndex].AdditiveInverse));
+                    reductionOperations[reductionOperations.Count - 1].ApplyTo(temp);
                 }
             }
+            
+            reducedEchelonFormOperations = new List<MatrixOpertaion<T>>();
+            reducedEchelonFormOperations.AddRange(echelonFormOperations);
+            reducedEchelonFormOperations.AddRange(reductionOperations);
 
             return temp;
         }
