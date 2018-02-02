@@ -1,4 +1,4 @@
-﻿using RedMath.Numerics;
+﻿using RedMath.Structures;
 using System;
 
 namespace RedMath
@@ -51,7 +51,7 @@ namespace RedMath
 
                 TransformedData = new Complex[sourceData.Length];
 
-                BinaryLog = (int)System.Math.Log(TransformedData.Length, 2);
+                BinaryLog = (int)Math.Log(TransformedData.Length, 2);
 
                 Transform();
             }

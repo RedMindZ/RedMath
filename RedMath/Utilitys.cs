@@ -142,16 +142,6 @@ namespace RedMath
 
             return prod;
         }
-
-        public static int CountDigits(double x)
-        {
-            return x.ToString().Length;
-        }
-
-        public static int CountDigits<T>(Field<T> x) where T : new()
-        {
-            return x.ToString().Length;
-        }
     }
 
     

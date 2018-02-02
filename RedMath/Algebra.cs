@@ -1,5 +1,4 @@
-﻿using RedMath.Numerics;
-using RedMath.Structures;
+﻿using RedMath.Structures;
 using System;
 
 namespace RedMath
@@ -54,7 +53,7 @@ namespace RedMath
 
         public static bool IsPowerOfTwo(ulong x)
         {
-            return (x > 0) && ((x & (x - 1)) == 0);
+            return (x & (x - 1)) == 0;
         }
 
         public static int NextGreaterPowerOfTwo(int x)

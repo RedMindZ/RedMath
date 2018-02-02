@@ -1,5 +1,4 @@
-﻿using RedMath.Numerics;
-using RedMath.Structures;
+﻿using RedMath.Structures;
 using System;
 
 namespace RedMath.LinearAlgebra

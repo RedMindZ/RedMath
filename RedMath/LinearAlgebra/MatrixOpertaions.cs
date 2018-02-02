@@ -127,27 +127,21 @@ namespace RedMath.LinearAlgebra.MatrixOperations
 
     public class RowPermutation<T> : MatrixOpertaion<T> where T : Field<T>, new()
     {
-        public List<int> IndexList { get; set; }
+        public List<int> IndexList;
 
         public RowPermutation(params int[] indices)
         {
-            IndexList = new List<int>();
-
-            for (int i = 0; i < indices.Length; i++)
-            {
-                IndexList.Add(indices[i]);
-            }
+            IndexList = new List<int>(indices.Length);
+            IndexList.AddRange(indices);
         }
 
         public Matrix<T> ToMatrix()
         {
-            Matrix<T> mat = new Matrix<T>(IndexList.Count, 0);
+            Matrix<T> mat = new Matrix<T>(IndexList.Count, IndexList.Count);
 
             for (int i = 0; i < IndexList.Count; i++)
             {
-                Vector<T> vec = new Vector<T>(IndexList.Count);
-                vec[IndexList[i]] = new T().One;
-                mat.AppendColumnVector(vec);
+                mat[IndexList[i], i] = new T().One;
             }
 
             return mat;

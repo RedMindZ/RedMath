@@ -77,6 +77,16 @@ namespace RedMath.Structures
             return new Real(a.Value / b.Value);
         }
 
+        public static bool operator ==(Real a, Real b)
+        {
+            return a.Value == b.Value;
+        }
+
+        public static bool operator !=(Real a, Real b)
+        {
+            return a.Value != b.Value;
+        }
+
         public override Real Add(Real element)
         {
             return this + element;
@@ -85,6 +95,16 @@ namespace RedMath.Structures
         public override Real Multiply(Real element)
         {
             return this * element;
+        }
+
+        public override bool Equals(object obj)
+        {
+            if (obj == null || !GetType().Equals(obj))
+            {
+                return false;
+            }
+
+            return Equals((Real)obj);
         }
 
         public override bool Equals(Real other)
