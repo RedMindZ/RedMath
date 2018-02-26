@@ -60,8 +60,6 @@ namespace RedMathTests
         [TestMethod]
         public void DecompositionTest()
         {
-
-
             Debug.WriteLine(mat);
             Debug.WriteLine("--->");
             Debug.WriteLine(mat.EchelonForm);
@@ -71,20 +69,41 @@ namespace RedMathTests
 
             Debug.WriteLine("L:");
             Debug.WriteLine("--->");
-            Debug.WriteLine(mat.Decomposition.Item1);
+            Debug.WriteLine(mat.Decomposition.LowerMatrix);
             Debug.WriteLine("");
             Debug.WriteLine("U:");
             Debug.WriteLine("--->");
-            Debug.WriteLine(mat.Decomposition.Item2);
+            Debug.WriteLine(mat.Decomposition.UpperMatrix);
             Debug.WriteLine("");
             Debug.WriteLine("P:");
             Debug.WriteLine("--->");
-            Debug.WriteLine(mat.Decomposition.Item3.ToMatrix());
+            Debug.WriteLine(mat.Decomposition.Permutation.ToMatrix());
             Debug.WriteLine("");
             Debug.WriteLine("P * L * U:");
             Debug.WriteLine("--->");
-            Debug.WriteLine(mat.Decomposition.Item3.ToMatrix() * mat.Decomposition.Item1 * mat.Decomposition.Item2);
+            Debug.WriteLine(mat.Decomposition.Permutation.ToMatrix() * mat.Decomposition.LowerMatrix * mat.Decomposition.UpperMatrix);
             Debug.WriteLine("");
+        }
+
+        [TestMethod]
+        public void EquivalenceTest()
+        {
+            Matrix<Real> m1 = new Matrix<Real>(new Real[,] { { 1, 2 }, { 3, 4 } });
+            Matrix<Real> m2 = new Matrix<Real>(new Real[,] { { 1, 2 }, { 3, 4 } });
+
+            Debug.WriteLine("M1:");
+            Debug.WriteLine(m1);
+            Debug.WriteLine("");
+
+            Debug.WriteLine("M2:");
+            Debug.WriteLine(m2);
+            Debug.WriteLine("");
+
+            Debug.WriteLine("M1 == M2");
+            Debug.WriteLine(m1 == m2);
+
+            Debug.WriteLine("M1.Equals(M2)");
+            Debug.WriteLine(m1.Equals(m2));
         }
 
         [TestMethod]

@@ -1,13 +1,12 @@
 ﻿using System;
-using RedMath.Structures;
 using RedMath.LinearAlgebra;
 
 namespace RedMath.Structures
 {
     public class Complex : Field<Complex>
     {
-        public double Real;
-        public double Imaginary;
+        public double Real { get; set; }
+        public double Imaginary { get; set; }
 
         public Complex SquareRoot
         {
@@ -82,16 +81,22 @@ namespace RedMath.Structures
             Imaginary = 0;
         }
 
-        public Complex(double scalar)
+        public Complex(double real)
         {
-            Real = scalar;
-            Imaginary = scalar;
+            Real = real;
+            Imaginary = 0;
         }
 
         public Complex(double real, double imaginary)
         {
             Real = Math.Round(real, 3);
             Imaginary = Math.Round(imaginary, 3);
+        }
+
+        public Complex(Complex other)
+        {
+            Real = other.Real;
+            Imaginary = other.Imaginary;
         }
 
         public Complex Conjugate
@@ -151,7 +156,7 @@ namespace RedMath.Structures
         {
             Complex instance = obj as Complex;
 
-            if (instance == null)
+            if ((object)instance == null)
             {
                 return false;
             }
@@ -240,6 +245,11 @@ namespace RedMath.Structures
         public override Complex Multiply(Complex element)
         {
             return this * element;
+        }
+
+        public override Complex Clone()
+        {
+            return new Complex(this);
         }
     }
 }

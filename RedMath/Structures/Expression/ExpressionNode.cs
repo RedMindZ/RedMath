@@ -5,22 +5,98 @@ using RedMath.LinearAlgebra;
 
 namespace RedMath.Structures.Expression
 {
-    public abstract class ExpressionNode<T>
+    internal static class StringConstants
     {
-        public abstract T Evaluate<P>(Dictionary<P, object> feedDict = null);
+        internal static string TreeStartString = "\u2514";
+        internal static string TreeMiddleString = "\u2500\u2500\u2500";
+        internal static string TreePrefixString = TreeStartString + TreeMiddleString;
     }
 
-    public abstract class ExpressionNode<T, L, R> : ExpressionNode<T>
+    public abstract class BaseExpressionNode<T>
     {
-        public ExpressionNode<L> Left { get; protected set; }
-        public ExpressionNode<R> Right { get; protected set; }
+        public abstract T Evaluate();
     }
 
-    public class FieldAddNode<T> : ExpressionNode<T, T, T> where T : Field<T>, new()
+    public abstract class BinaryExpressionNode<T, LChildType, RChildType> : BaseExpressionNode<T>
     {
-        public override T Evaluate<P>(Dictionary<P, object> feedDict = null)
+        public BaseExpressionNode<LChildType> LeftChild { get; set; }
+        public BaseExpressionNode<RChildType> RightChild { get; set; }
+
+        protected string wrapString(string str)
         {
-            return Left.Evaluate(feedDict).Add(Right.Evaluate(feedDict));
+            return "(" + LeftChild.ToString() + ")" + " " + str + " " + "(" + RightChild.ToString() + ")";
+        }
+    }
+
+    public class ConstantNode<T> : BaseExpressionNode<T>
+    {
+        public T Value { get; set; }
+
+        public ConstantNode(T val)
+        {
+            Value = val;
+        }
+
+        public override T Evaluate()
+        {
+            return Value;
+        }
+
+        public override string ToString()
+        {
+            return Value.ToString();
+        }
+    }
+
+    public class AddNode<T> : BinaryExpressionNode<T, T, T> where T : Field<T>
+    {
+        public override T Evaluate()
+        {
+            return Field<T>.Add(LeftChild.Evaluate(), RightChild.Evaluate());
+        }
+
+        public override string ToString()
+        {
+            return wrapString("+");
+        }
+    }
+
+    public class MultiplyNode<T> : BinaryExpressionNode<T, T, T> where T : Field<T>
+    {
+        public override T Evaluate()
+        {
+            return Field<T>.Multiply(LeftChild.Evaluate(), RightChild.Evaluate());
+        }
+
+        public override string ToString()
+        {
+            return wrapString("*");
+        }
+    }
+
+    public class SubtractNode<T> : BinaryExpressionNode<T, T, T> where T : Field<T>
+    {
+        public override T Evaluate()
+        {
+            return Field<T>.Subtract(LeftChild.Evaluate(), RightChild.Evaluate());
+        }
+
+        public override string ToString()
+        {
+            return wrapString("-");
+        }
+    }
+
+    public class DivideNode<T> : BinaryExpressionNode<T, T, T> where T : Field<T>
+    {
+        public override T Evaluate()
+        {
+            return Field<T>.Divide(LeftChild.Evaluate(), RightChild.Evaluate());
+        }
+
+        public override string ToString()
+        {
+            return wrapString("/");
         }
     }
 }

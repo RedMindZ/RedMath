@@ -1,14 +1,8 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace RedMath.Structures
+﻿namespace RedMath.Structures
 {
     public class Real : Field<Real>
     {
-        public double Value;
+        public double Value { get; set; }
 
         public override Real Zero
         {
@@ -99,12 +93,14 @@ namespace RedMath.Structures
 
         public override bool Equals(object obj)
         {
-            if (obj == null || !GetType().Equals(obj))
+            Real other = obj as Real;
+
+            if ((object)other == null)
             {
                 return false;
             }
 
-            return Equals((Real)obj);
+            return Equals(other);
         }
 
         public override bool Equals(Real other)
@@ -115,6 +111,11 @@ namespace RedMath.Structures
             }
 
             return false;
+        }
+
+        public override int GetHashCode()
+        {
+            return (int)Value;
         }
 
         public static implicit operator Real(double d)
@@ -130,6 +131,11 @@ namespace RedMath.Structures
         public override string ToString()
         {
             return Value.ToString();
+        }
+
+        public override Real Clone()
+        {
+            return new Real(Value);
         }
     }
 }

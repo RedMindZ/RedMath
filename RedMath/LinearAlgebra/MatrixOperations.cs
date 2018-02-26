@@ -1,19 +1,17 @@
-﻿using RedMath.Structures;
-using System;
+﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+
+using RedMath.Structures;
 
 namespace RedMath.LinearAlgebra.MatrixOperations
 {
-    public interface MatrixOpertaion<T> where T : Field<T>, new()
+    public interface MatrixOperation<T> where T : Field<T>, new()
     {
         void ApplyTo(Matrix<T> target);
         void InverseApplyTo(Matrix<T> target);
     }
 
-    public class SwapRows<T> : MatrixOpertaion<T> where T : Field<T>, new()
+    public class SwapRows<T> : MatrixOperation<T> where T : Field<T>, new()
     {
         public int FirstRowIndex { get; set; }
         public int SecondRowIndex { get; set; }
@@ -40,7 +38,7 @@ namespace RedMath.LinearAlgebra.MatrixOperations
         }
     }
 
-    public class SwapColumns<T> : MatrixOpertaion<T> where T : Field<T>, new()
+    public class SwapColumns<T> : MatrixOperation<T> where T : Field<T>, new()
     {
         public int FirstColumnIndex { get; set; }
         public int SecondColumnIndex { get; set; }
@@ -67,7 +65,7 @@ namespace RedMath.LinearAlgebra.MatrixOperations
         }
     }
 
-    public class MultiplyRowByScalar<T> : MatrixOpertaion<T> where T : Field<T>, new()
+    public class MultiplyRowByScalar<T> : MatrixOperation<T> where T : Field<T>, new()
     {
         public int RowIndex { get; set; }
         public T Scalar { get; set; }
@@ -95,7 +93,7 @@ namespace RedMath.LinearAlgebra.MatrixOperations
         }
     }
 
-    public class AddRowMultiple<T> : MatrixOpertaion<T> where T : Field<T>, new()
+    public class AddRowMultiple<T> : MatrixOperation<T> where T : Field<T>, new()
     {
         public int BaseRowIndex { get; set; }
         public int TargetRowIndex { get; set; }
@@ -125,9 +123,41 @@ namespace RedMath.LinearAlgebra.MatrixOperations
         }
     }
 
-    public class RowPermutation<T> : MatrixOpertaion<T> where T : Field<T>, new()
+    public class RowPermutation<T> : MatrixOperation<T> where T : Field<T>, new()
     {
         public List<int> IndexList;
+
+        public int Signature
+        {
+            get
+            {
+                int sign = 1;
+                bool[] visited = new bool[IndexList.Count];
+
+                for (int i = 0; i < IndexList.Count; i++)
+                {
+                    if (!visited[i])
+                    {
+                        int next = i;
+                        bool isCycleLenEven = true;
+
+                        while (!visited[next])
+                        {
+                            visited[next] = true;
+                            isCycleLenEven = !isCycleLenEven;
+                            next = IndexList[next];
+                        }
+
+                        if (isCycleLenEven)
+                        {
+                            sign *= -1;
+                        }
+                    }
+                }
+
+                return sign;
+            }
+        }
 
         public RowPermutation(params int[] indices)
         {
@@ -141,7 +171,7 @@ namespace RedMath.LinearAlgebra.MatrixOperations
 
             for (int i = 0; i < IndexList.Count; i++)
             {
-                mat[IndexList[i], i] = new T().One;
+                mat[i, IndexList[i]] = new T().One;
             }
 
             return mat;
@@ -177,7 +207,7 @@ namespace RedMath.LinearAlgebra.MatrixOperations
         }
     }
 
-    public class ColumnPermutation<T> : MatrixOpertaion<T> where T : Field<T>, new()
+    public class ColumnPermutation<T> : MatrixOperation<T> where T : Field<T>, new()
     {
         public List<int> IndexList { get; set; }
 
