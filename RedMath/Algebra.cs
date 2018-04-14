@@ -86,5 +86,28 @@ namespace RedMath
 
             return sum;
         }
+
+        public static long GreatestCommonDivisor(long a, long b)
+        {
+            a = Math.Abs(a);
+            b = Math.Abs(b);
+
+            if (b > a)
+            {
+                long temp = a;
+                a = b;
+                b = temp;
+            }
+
+
+            while (b != 0)
+            {
+                long temp = b;
+                b = a % b;
+                a = temp;
+            }
+
+            return a;
+        }
     }
 }

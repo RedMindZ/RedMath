@@ -38,7 +38,7 @@ namespace RedMath.LinearAlgebra
             {
                 for (int j = 0; j < i; j++)
                 {
-                    A_t[i, j] = axis.Submatrix(i, -1).Cofactor(j, -1);
+                    A_t[i, j] = axis.SubMatrix(i, -1).Cofactor(j, -1);
                     A_t[j, i] = -A_t[i, j];
                 }
             }

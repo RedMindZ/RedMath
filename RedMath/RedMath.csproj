@@ -38,10 +38,12 @@
     <Compile Include="LinearAlgebra\MatrixOperations.cs" />
     <Compile Include="LinearAlgebra\MatrixTransformations.cs" />
     <Compile Include="LinearAlgebra\Vector.cs" />
+    <Compile Include="LinearAlgebra\VectorSpace.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Structures\Complex.cs" />
     <Compile Include="Structures\Expression\ExpressionNode.cs" />
     <Compile Include="Structures\Field.cs" />
+    <Compile Include="Structures\Rational.cs" />
     <Compile Include="Structures\Real.cs" />
     <Compile Include="Utilitys.cs" />
     <Compile Include="Utils\Cache.cs" />

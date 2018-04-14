@@ -36,8 +36,10 @@
                 {
                     return 1 / this;
                 }
-
-                return null;
+                else
+                {
+                    throw new System.DivideByZeroException();
+                }
             }
         }
 

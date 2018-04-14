@@ -36,6 +36,11 @@ namespace RedMath.LinearAlgebra.MatrixOperations
         {
             ApplyTo(target);
         }
+
+        public override string ToString()
+        {
+            return "R" + FirstRowIndex + " <---> " + "R" + SecondRowIndex;
+        }
     }
 
     public class SwapColumns<T> : MatrixOperation<T> where T : Field<T>, new()
@@ -62,6 +67,11 @@ namespace RedMath.LinearAlgebra.MatrixOperations
         public void InverseApplyTo(Matrix<T> target)
         {
             ApplyTo(target);
+        }
+
+        public override string ToString()
+        {
+            return "C" + FirstColumnIndex + " <---> " + "C" + SecondColumnIndex;
         }
     }
 
@@ -90,6 +100,11 @@ namespace RedMath.LinearAlgebra.MatrixOperations
             {
                 target[RowIndex, i] = target[RowIndex, i].Multiply(Scalar.MultiplicativeInverse);
             }
+        }
+
+        public override string ToString()
+        {
+            return Scalar + " * " + "R" + RowIndex + " ---> " + "R" + RowIndex;
         }
     }
 
@@ -120,6 +135,11 @@ namespace RedMath.LinearAlgebra.MatrixOperations
             {
                 target[TargetRowIndex, i] = target[TargetRowIndex, i].Subtract(target[BaseRowIndex, i].Multiply(Scalar));
             }
+        }
+
+        public override string ToString()
+        {
+            return Scalar + " * " + "R"  + BaseRowIndex + " + " + "R" + TargetRowIndex + " ---> " + "R" + TargetRowIndex;
         }
     }
 

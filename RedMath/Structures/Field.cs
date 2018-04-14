@@ -52,6 +52,27 @@ namespace RedMath.Structures
         }
 
 
+        public static T operator +(Field<T> left, T right)
+        {
+            return left.Add(right);
+        }
+
+        public static T operator *(Field<T> left, T right)
+        {
+            return left.Multiply(right);
+        }
+
+        public static T operator -(Field<T> left, T right)
+        {
+            return left.Subtract(right);
+        }
+
+        public static T operator /(Field<T> left, T right)
+        {
+            return left.Divide(right);
+        }
+
+
 
         public abstract T Clone();
 

@@ -3,7 +3,26 @@ using System;
 
 namespace RedMath.LinearAlgebra
 {
-    public class Vector<T> where T : Field<T>, new()
+    /// <summary>
+    /// Potentialy usefull class for implementing special vector spaces like R[x] (the polynomial vector space).
+    /// Currently in development and may not be ready for use.
+    /// </summary>
+    public abstract class VectorBase<T, F> where T : VectorBase<T, F> where F : Field<F>
+    {
+        public abstract T Zero { get; }
+
+        public abstract T AddativeInverse { get; }
+
+        public abstract T Add(T other);
+        public abstract T MultiplyByScalar(F scalar);
+
+        public T Subtract(T other)
+        {
+            return Add(other.AddativeInverse);
+        }
+    }
+
+    public class Vector<T> : VectorBase<Vector<T>, T> where T : Field<T>, new()
     {
         private T[] components;
 
@@ -37,8 +56,21 @@ namespace RedMath.LinearAlgebra
                         temp[i] = components[i];
                     }
 
+                    for (int i = Dimension; i < temp.Length; i++)
+                    {
+                        temp[i] = new T().Zero.Clone();
+                    }
+
                     components = temp;
                 }
+            }
+        }
+
+        public override Vector<T> Zero
+        {
+            get
+            {
+                return new Vector<T>(Dimension);
             }
         }
 
@@ -48,6 +80,11 @@ namespace RedMath.LinearAlgebra
             {
                 return components[0];
             }
+
+            set
+            {
+                components[0] = value;
+            }
         }
 
         public T Y
@@ -55,6 +92,11 @@ namespace RedMath.LinearAlgebra
             get
             {
                 return components[1];
+            }
+
+            set
+            {
+                components[1] = value;
             }
         }
 
@@ -64,13 +106,10 @@ namespace RedMath.LinearAlgebra
             {
                 return components[2];
             }
-        }
 
-        public T W
-        {
-            get
+            set
             {
-                return components[3];
+                components[2] = value;
             }
         }
 
@@ -87,7 +126,7 @@ namespace RedMath.LinearAlgebra
             }
         }
 
-        public Vector<T> Opposite
+        public override Vector<T> AddativeInverse
         {
             get
             {
@@ -138,7 +177,7 @@ namespace RedMath.LinearAlgebra
 
             for (int i = 0; i < dim; i++)
             {
-                components[i] = new T().Zero;
+                components[i] = new T().Zero.Clone();
             }
         }
 
@@ -148,9 +187,11 @@ namespace RedMath.LinearAlgebra
 
             for (int i = 0; i < comp.Length; i++)
             {
-                components[i] = comp[i];
+                components[i] = comp[i].Clone();
             }
         }
+
+        public Vector(Vector<T> other) : this((T[])other) { }
 
         public T Sum()
         {
@@ -170,7 +211,7 @@ namespace RedMath.LinearAlgebra
 
             for (int i = 0; i < Dimension; i++)
             {
-                temp[0, i] = this[i];
+                temp[0, i] = this[i].Clone();
             }
 
             return new Matrix<T>(temp);
@@ -182,7 +223,7 @@ namespace RedMath.LinearAlgebra
 
             for (int i = 0; i < Dimension; i++)
             {
-                temp[i, 0] = this[i];
+                temp[i, 0] = this[i].Clone();
             }
 
             return new Matrix<T>(temp);
@@ -210,9 +251,39 @@ namespace RedMath.LinearAlgebra
             return normalVec;
         }
 
-        public static Vector<T> operator +(Vector<T> a, Vector<T> b)
+        public override Vector<T> Add(Vector<T> other)
         {
-            Vector<T> vec = new Vector<T>((int)Math.Max(a.Dimension, b.Dimension));
+            if (other.Dimension != Dimension)
+            {
+                throw new InvalidOperationException("Only two vectors of the same dimension can be added together.");
+            }
+
+            Vector<T> vectorSum = new Vector<T>(Dimension);
+
+            for (int i = 0; i < vectorSum.Dimension; i++)
+            {
+                vectorSum[i] = vectorSum[i].Add(components[i]);
+                vectorSum[i] = vectorSum[i].Add(other[i]);
+            }
+
+            return vectorSum;
+        }
+
+        public override Vector<T> MultiplyByScalar(T scalar)
+        {
+            Vector<T> scaledVector = new Vector<T>(components);
+
+            for (int i = 0; i < scaledVector.Dimension; i++)
+            {
+                scaledVector[i] = scaledVector[i].Multiply(scalar);
+            }
+
+            return scaledVector;
+        }
+
+        public static Vector<T> operator +(Vector<T> left, Vector<T> right)
+        {
+            /*Vector<T> vec = new Vector<T>(Math.Max(a.Dimension, b.Dimension));
 
             for (int i = 0; i < vec.Dimension; i++)
             {
@@ -227,17 +298,19 @@ namespace RedMath.LinearAlgebra
                 }
             }
 
-            return vec;
+            return vec;*/
+
+            return left.Add(right);
         }
 
-        public static Vector<T> operator -(Vector<T> a)
+        public static Vector<T> operator -(Vector<T> vec)
         {
-            return a.Opposite;
+            return vec.AddativeInverse;
         }
 
-        public static Vector<T> operator -(Vector<T> a, Vector<T> b)
+        public static Vector<T> operator -(Vector<T> left, Vector<T> right)
         {
-            Vector<T> vec = new Vector<T>((int)Math.Max(a.Dimension, b.Dimension));
+            /*Vector<T> vec = new Vector<T>((int)Math.Max(a.Dimension, b.Dimension));
 
             for (int i = 0; i < vec.Dimension; i++)
             {
@@ -252,31 +325,37 @@ namespace RedMath.LinearAlgebra
                 }
             }
 
-            return vec;
+            return vec;*/
+
+            return left.Subtract(right);
         }
 
-        public static Vector<T> operator *(Vector<T> a, T d)
+        public static Vector<T> operator *(Vector<T> vec, T scalar)
         {
-            Vector<T> vec = new Vector<T>(a.components);
+            /*Vector<T> scaledVector = new Vector<T>(vec.components);
 
-            for (int i = 0; i < vec.Dimension; i++)
+            for (int i = 0; i < scaledVector.Dimension; i++)
             {
-                vec[i] = vec[i].Multiply(d);
+                scaledVector[i] = scaledVector[i].Multiply(scalar);
             }
 
-            return vec;
+            return scaledVector;*/
+
+            return vec.MultiplyByScalar(scalar);
         }
 
-        public static Vector<T> operator *(T d, Vector<T> a)
+        public static Vector<T> operator *(T scalar, Vector<T> vec)
         {
-            Vector<T> vec = new Vector<T>(a.components);
+            /*Vector<T> scaledVector = new Vector<T>(vec.components);
 
-            for (int i = 0; i < vec.Dimension; i++)
+            for (int i = 0; i < scaledVector.Dimension; i++)
             {
-                vec[i] = vec[i].Multiply(d);
+                scaledVector[i] = scaledVector[i].Multiply(scalar);
             }
 
-            return vec;
+            return scaledVector;*/
+
+            return vec.MultiplyByScalar(scalar);
         }
 
         public static Vector<T> operator /(Vector<T> a, T d)
@@ -295,7 +374,7 @@ namespace RedMath.LinearAlgebra
         {
             if (a.Dimension != b.Dimension)
             {
-                throw new ArgumentException("The Dot Product can only be applied to two vectors of the same dimension");
+                throw new ArgumentException("The dot product can only be applied to two vectors of the same dimension.");
             }
 
             Complex sum = new Complex();
@@ -310,14 +389,26 @@ namespace RedMath.LinearAlgebra
 
         public static Real DotProduct(Vector<Real> a, Vector<Real> b)
         {
-            return Vector<Complex>.DotProduct(a, b);
+            if (a.Dimension != b.Dimension)
+            {
+                throw new ArgumentException("The dot product can only be applied to two vectors of the same dimension.");
+            }
+
+            Real sum = 0;
+
+            for (int i = 0; i < a.Dimension; i++)
+            {
+                sum = sum.Add(a[i].Multiply(b[i]));
+            }
+
+            return sum;
         }
-        
+
         public static Vector<T> CrossProduct(params Vector<T>[] vectors)
         {
             if (vectors.Length < 2)
             {
-                throw new ArgumentException("Cross product requires atleast 2 vectors", "vectors");
+                throw new ArgumentException("Cross product requires at least 2 vectors", "vectors");
             }
 
             for (int i = 1; i < vectors.Length; i++)
@@ -342,15 +433,13 @@ namespace RedMath.LinearAlgebra
 
             Vector<T> sum = new Vector<T>(vectors[0].Dimension);
 
-            for (int i = 0; i < vectors[0].Dimension; i++)
+            for (int i = 0; i < sum.Dimension; i++)
             {
-                if (i % 2 == 0)
+                sum[i] = sum[i].Add(mat.Minor(i, -1));
+
+                if (i % 2 == 1)
                 {
-                    sum[i] = sum[i].Add(mat.Minor(i, -1));
-                }
-                else
-                {
-                    sum[i] = sum[i].Add(mat.Minor(i, -1).AdditiveInverse);
+                    sum[i] = sum[i].AdditiveInverse;
                 }
             }
 
@@ -386,7 +475,7 @@ namespace RedMath.LinearAlgebra
 
             for (int i = 0; i < temp.Length; i++)
             {
-                temp[i] = vec[i];
+                temp[i] = vec[i].Clone();
             }
 
             return temp;

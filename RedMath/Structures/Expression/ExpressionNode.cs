@@ -5,12 +5,6 @@ using RedMath.LinearAlgebra;
 
 namespace RedMath.Structures.Expression
 {
-    internal static class StringConstants
-    {
-        internal static string TreeStartString = "\u2514";
-        internal static string TreeMiddleString = "\u2500\u2500\u2500";
-        internal static string TreePrefixString = TreeStartString + TreeMiddleString;
-    }
 
     public abstract class BaseExpressionNode<T>
     {

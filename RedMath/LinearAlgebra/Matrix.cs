@@ -10,7 +10,7 @@ namespace RedMath.LinearAlgebra
     public class Matrix<T> where T : Field<T>, new()
     {
         #region Class Fields
-        private T[,] definingArray;
+        protected T[,] definingArray;
 
         private static T fieldZero = new T().Zero;
         private static T fieldOne = new T().One;
@@ -337,9 +337,14 @@ namespace RedMath.LinearAlgebra
         {
             get
             {
-                if (!IsSquareMatrix || Determinant.Equals(fieldZero))
+                /*
+                if (!IsSquareMatrix)
                 {
-                    return null;
+                    throw new InvalidOperationException("A non-square matrix doesn't have an inverse.");
+                }
+                else if (Determinant.Equals(fieldZero))
+                {
+                    throw new InvalidOperationException("A matrix with determinant 0 doesn't have an inverse.");
                 }
 
                 Matrix<T> mat = new Matrix<T>(Rows, Columns);
@@ -352,7 +357,25 @@ namespace RedMath.LinearAlgebra
                     op.ApplyTo(mat);
                 }
 
-                return mat;
+                return mat;*/
+
+                return computationCache.RetrieveValue<Matrix<T>, Matrix<T>>("inverse", this);
+            }
+        }
+
+        public int Rank
+        {
+            get
+            {
+                return computationCache.RetrieveValue<int, Matrix<T>>("rank", this);
+            }
+        }
+
+        public bool IsFullRank
+        {
+            get
+            {
+                return IsSquareMatrix && Rank == Rows;
             }
         }
 
@@ -422,42 +445,45 @@ namespace RedMath.LinearAlgebra
             computationCache.AddCacheEntry("determinant", null, true, (Matrix<T> mat) => mat.computeDeterminant());
             computationCache.AddCacheEntry("echelonForm", null, true, (Matrix<T> mat) => mat.computeEchelonForm().Item1);
             computationCache.AddCacheEntry("reducedEchelonForm", null, true, (Matrix<T> mat) => mat.computeReducedEchelonForm().Item1);
-            computationCache.AddCacheEntry("echelonFormOperations", new List<MatrixOperation<T>>(), true, (Matrix<T> mat) => mat.computeEchelonForm().Item2);
-            computationCache.AddCacheEntry("reducedEchelonFormOperations", new List<MatrixOperation<T>>(), true, (Matrix<T> mat) => mat.computeReducedEchelonForm().Item2);
+            computationCache.AddCacheEntry("echelonFormOperations", null, true, (Matrix<T> mat) => mat.computeEchelonForm().Item2);
+            computationCache.AddCacheEntry("reducedEchelonFormOperations", null, true, (Matrix<T> mat) => mat.computeReducedEchelonForm().Item2);
             computationCache.AddCacheEntry("decomposition", null, true, (Matrix<T> mat) => mat.computeDecomposition());
             computationCache.AddCacheEntry("identity", false, true, (Matrix<T> mat) => mat.testForIdentity());
             computationCache.AddCacheEntry("cofactorMatrix", null, true, (Matrix<T> mat) => mat.computeCofactorMatrix());
+            computationCache.AddCacheEntry("inverse", null, true, (Matrix<T> mat) => mat.computeInverse());
+            computationCache.AddCacheEntry("rank", 0, true, (Matrix<T> mat) => mat.computeRank());
         }
+
         #endregion
 
-        public Matrix<T> Submatrix(int row, int col)
+        public Matrix<T> SubMatrix(int row, int col)
         {
-            int x = 0;
-            int y = 0;
+            int rowIndex = 0;
+            int colIndex = 0;
 
-            T[,] temp = new T[Height - (row < 0 ? 0 : 1), Width - (col < 0 ? 0 : 1)];
+            T[,] subMatrix = new T[Height - (row < 0 ? 0 : 1), Width - (col < 0 ? 0 : 1)];
 
             for (int i = 0; i < Height; i++)
             {
                 if (i != row)
                 {
-                    x = 0;
+                    colIndex = 0;
 
                     for (int j = 0; j < Width; j++)
                     {
                         if (j != col)
                         {
-                            temp[y, x] = this[i, j];
+                            subMatrix[rowIndex, colIndex] = this[i, j];
 
-                            x++;
+                            colIndex++;
                         }
                     }
 
-                    y++;
+                    rowIndex++;
                 }
             }
 
-            return new Matrix<T>(temp);
+            return new Matrix<T>(subMatrix);
         }
 
         public void Resize(int rows, int cols)
@@ -551,7 +577,7 @@ namespace RedMath.LinearAlgebra
             {
                 if (i < row.Dimension)
                 {
-                    temp[temp.Height - 1, i] = row[i];
+                    temp[temp.Height - 1, i] = row[i].Clone();
                 }
                 else
                 {
@@ -593,7 +619,7 @@ namespace RedMath.LinearAlgebra
             {
                 if (i < row.Dimension)
                 {
-                    temp[index, i] = row[i];
+                    temp[index, i] = row[i].Clone();
                 }
                 else
                 {
@@ -627,7 +653,7 @@ namespace RedMath.LinearAlgebra
             {
                 if (i < col.Dimension)
                 {
-                    temp[i, temp.Columns - 1] = col[i];
+                    temp[i, temp.Columns - 1] = col[i].Clone();
                 }
                 else
                 {
@@ -669,7 +695,7 @@ namespace RedMath.LinearAlgebra
             {
                 if (i < col.Dimension)
                 {
-                    temp[i, index] = col[i];
+                    temp[i, index] = col[i].Clone();
                 }
                 else
                 {
@@ -684,7 +710,7 @@ namespace RedMath.LinearAlgebra
 
         public T Minor(int row, int col)
         {
-            return Submatrix(row, col).Determinant;
+            return SubMatrix(row, col).Determinant;
         }
 
         public T Cofactor(int row, int col)
@@ -696,20 +722,20 @@ namespace RedMath.LinearAlgebra
         {
             if (!IsSquareMatrix)
             {
-                return null;
+                throw new InvalidOperationException("A non-square matrix doesn't have a cofactor matrix.");
             }
 
-            Matrix<T> m = new Matrix<T>(Height, Width);
+            Matrix<T> cofactorMat = new Matrix<T>(Height, Width);
 
-            for (int i = 0; i < m.Height; i++)
+            for (int i = 0; i < cofactorMat.Height; i++)
             {
-                for (int j = 0; j < m.Width; j++)
+                for (int j = 0; j < cofactorMat.Width; j++)
                 {
-                    m[i, j] = Cofactor(i, j);
+                    cofactorMat[i, j] = Cofactor(i, j);
                 }
             }
 
-            return m;
+            return cofactorMat;
         }
 
         private LUPDecomposition<T> computeDecomposition()
@@ -809,7 +835,7 @@ namespace RedMath.LinearAlgebra
         {
             if (!IsSquareMatrix)
             {
-                return null;
+                throw new InvalidOperationException("A non-square matrix doesn't have a determinant.");
             }
 
             if (Height == 1)
@@ -818,7 +844,7 @@ namespace RedMath.LinearAlgebra
             }
 
             T det = Utilitys.SequenceProduct(Decomposition.LowerMatrix.MainDiagonal).Multiply(Utilitys.SequenceProduct(Decomposition.UpperMatrix.MainDiagonal));
-            
+
             if (Decomposition.Permutation.Signature == 1)
             {
                 return det;
@@ -831,25 +857,25 @@ namespace RedMath.LinearAlgebra
 
         private Tuple<Matrix<T>, List<MatrixOperation<T>>> computeEchelonForm()
         {
-            Matrix<T> temp = new Matrix<T>(this);
+            Matrix<T> reducedMat = new Matrix<T>(this);
             List<MatrixOperation<T>> reductionOperations = new List<MatrixOperation<T>>();
 
             bool isZeroColumn = false;
 
             int rowOffset = 0;
 
-            for (int col = 0; col < Math.Min(temp.Rows, temp.Columns); col++)
+            for (int col = 0; col < Math.Min(reducedMat.Rows, reducedMat.Columns); col++)
             {
                 isZeroColumn = false;
-                if (temp[col - rowOffset, col].Equals(fieldZero))
+                if (reducedMat[col - rowOffset, col].Equals(fieldZero))
                 {
                     isZeroColumn = true;
-                    for (int row = col + 1 - rowOffset; row < temp.Height; row++)
+                    for (int row = col + 1 - rowOffset; row < reducedMat.Height; row++)
                     {
-                        if (!temp[row, col].Equals(fieldZero))
+                        if (!reducedMat[row, col].Equals(fieldZero))
                         {
                             reductionOperations.Add(new SwapRows<T>(row, col - rowOffset));
-                            reductionOperations[reductionOperations.Count - 1].ApplyTo(temp);
+                            reductionOperations[reductionOperations.Count - 1].ApplyTo(reducedMat);
                             isZeroColumn = false;
                             break;
                         }
@@ -862,17 +888,21 @@ namespace RedMath.LinearAlgebra
                     continue;
                 }
 
-                reductionOperations.Add(new MultiplyRowByScalar<T>(col - rowOffset, temp[col - rowOffset, col].MultiplicativeInverse));
-                reductionOperations[reductionOperations.Count - 1].ApplyTo(temp);
+                reductionOperations.Add(new MultiplyRowByScalar<T>(col - rowOffset, reducedMat[col - rowOffset, col].MultiplicativeInverse));
+                reductionOperations[reductionOperations.Count - 1].ApplyTo(reducedMat);
 
-                for (int row = col + 1 - rowOffset; row < temp.Rows; row++)
+                reducedMat[col - rowOffset, col] = fieldOne.Clone(); // This line is in place to eliminate the possibility of rounding errors
+
+                for (int row = col + 1 - rowOffset; row < reducedMat.Rows; row++)
                 {
-                    reductionOperations.Add(new AddRowMultiple<T>(col - rowOffset, row, temp[row, col].AdditiveInverse));
-                    reductionOperations[reductionOperations.Count - 1].ApplyTo(temp);
+                    reductionOperations.Add(new AddRowMultiple<T>(col - rowOffset, row, reducedMat[row, col].AdditiveInverse));
+                    reductionOperations[reductionOperations.Count - 1].ApplyTo(reducedMat);
+
+                    reducedMat[row, col] = fieldZero.Clone(); // This line is in place to eliminate the possibility of rounding errors
                 }
             }
 
-            return new Tuple<Matrix<T>, List<MatrixOperation<T>>>(temp, reductionOperations);
+            return new Tuple<Matrix<T>, List<MatrixOperation<T>>>(reducedMat, reductionOperations);
         }
 
         private Tuple<Matrix<T>, List<MatrixOperation<T>>> computeReducedEchelonForm()
@@ -906,6 +936,7 @@ namespace RedMath.LinearAlgebra
                 {
                     reductionOperations.Add(new AddRowMultiple<T>(baseRow, currentRow, reducedEchelonFormMatrix[currentRow, entryIndex].AdditiveInverse));
                     reductionOperations[reductionOperations.Count - 1].ApplyTo(reducedEchelonFormMatrix);
+                    reducedEchelonFormMatrix[currentRow, entryIndex] = fieldZero.Clone(); // This line is in place to eliminate the possibility of rounding errors
                 }
             }
 
@@ -914,6 +945,32 @@ namespace RedMath.LinearAlgebra
             reducedEchelonFormOperations.AddRange(reductionOperations);
 
             return new Tuple<Matrix<T>, List<MatrixOperation<T>>>(reducedEchelonFormMatrix, reducedEchelonFormOperations);
+        }
+
+        private Matrix<T> computeInverse()
+        {
+            if (!IsSquareMatrix)
+            {
+                throw new InvalidOperationException("A non-square matrix doesn't have an inverse.");
+            }
+            else if (Determinant.Equals(fieldZero))
+            {
+                throw new InvalidOperationException("A matrix with determinant 0 doesn't have an inverse.");
+            }
+
+            Matrix<T> inverseMat = new Matrix<T>(Rows, Columns);
+
+            for (int i = 0; i < Rows; i++)
+            {
+                inverseMat[i, i] = new T().One;
+            }
+
+            foreach (var op in ReducedEchelonFormReductionOperations)
+            {
+                op.ApplyTo(inverseMat);
+            }
+
+            return inverseMat;
         }
 
         private bool testForIdentity()
@@ -950,12 +1007,39 @@ namespace RedMath.LinearAlgebra
             return isIdentity;
         }
 
+        private int computeRank()
+        {
+            Matrix<T> reducedMat = ReducedEchelonForm;
+            int rank = Rows;
+
+            for (int i = 0; i < Height; i++)
+            {
+                bool isZeroRow = true;
+
+                for (int j = 0; j < Width; j++)
+                {
+                    if (this[i, j] != fieldZero)
+                    {
+                        isZeroRow = false;
+                        break;
+                    }
+                }
+
+                if (isZeroRow)
+                {
+                    rank--;
+                }
+            }
+
+            return rank;
+        }
+
         #region Operators
         public static Matrix<T> operator +(Matrix<T> left, Matrix<T> right)
         {
             if (left.Width != right.Width || left.Height != right.Height)
             {
-                return null;
+                throw new InvalidOperationException("Matrices of different sizes can't be added.");
             }
 
             T[,] temp = new T[left.Height, left.Width];
@@ -975,7 +1059,7 @@ namespace RedMath.LinearAlgebra
         {
             if (left.Width != right.Width || left.Height != right.Height)
             {
-                return null;
+                throw new InvalidOperationException("Matrices of different sizes can't be subtracted.");
             }
 
             T[,] temp = new T[left.Height, left.Width];
@@ -1040,7 +1124,7 @@ namespace RedMath.LinearAlgebra
         {
             if (left.Width != right.Height)
             {
-                return null;
+                throw new InvalidOperationException("Matrices of incompatible sizes can't be multiplied.");
             }
 
             T[,] temp = new T[left.Height, right.Width];
