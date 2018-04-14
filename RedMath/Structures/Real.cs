@@ -53,6 +53,7 @@
             Value = val;
         }
 
+        /*
         public static Real operator +(Real a, Real b)
         {
             return new Real(a.Value + b.Value);
@@ -72,6 +73,7 @@
         {
             return new Real(a.Value / b.Value);
         }
+        */
 
         public static bool operator ==(Real a, Real b)
         {
@@ -83,14 +85,14 @@
             return a.Value != b.Value;
         }
 
-        public override Real Add(Real element)
+        public override Real Add(Real other)
         {
-            return this + element;
+            return new Real(Value + other.Value);
         }
 
-        public override Real Multiply(Real element)
+        public override Real Multiply(Real other)
         {
-            return this * element;
+            return new Real(Value * other.Value);
         }
 
         public override bool Equals(object obj)
@@ -107,7 +109,7 @@
 
         public override bool Equals(Real other)
         {
-            if (this.Value == other.Value)
+            if (Value == other.Value)
             {
                 return true;
             }

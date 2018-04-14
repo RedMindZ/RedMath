@@ -31,6 +31,7 @@ namespace RedMath.Structures
             }
         }
 
+
         public Rational ReducedForm
         {
             get
@@ -42,6 +43,16 @@ namespace RedMath.Structures
             }
         }
 
+        public double Value => (double)Numerator / Denominator;
+
+        public override Rational Zero => new Rational(0);
+
+        public override Rational One => new Rational(1);
+
+        public override Rational AdditiveInverse => new Rational(-Numerator, Denominator);
+
+        public override Rational MultiplicativeInverse => new Rational(Denominator, Numerator);
+
         public Rational()
         {
             Numerator = 0;
@@ -52,6 +63,16 @@ namespace RedMath.Structures
         {
             Numerator = numerator;
             Denominator = denominator;
+
+            Reduce();
+        }
+
+        public Rational(double number, int precision = 8)
+        {
+            Denominator = Algebra.IntPower(10, precision);
+            Numerator = (long)(number * Denominator);
+
+            Reduce();
         }
 
         public void Reduce()
@@ -68,27 +89,34 @@ namespace RedMath.Structures
             }
         }
 
-        public override Rational Zero => new Rational(0);
-
-        public override Rational One => new Rational(1);
-
-        public override Rational AdditiveInverse => new Rational(-Numerator, Denominator);
-
-        public override Rational MultiplicativeInverse => new Rational(Denominator, Numerator);
-
         public override Rational Add(Rational other)
         {
-            return new Rational(Numerator * other.Denominator + Denominator * other.Numerator, Denominator * other.Denominator);
+            return new Rational(Numerator * other.Denominator + Denominator * other.Numerator, Denominator * other.Denominator).ReducedForm;
         }
 
         public override Rational Multiply(Rational other)
         {
-            return new Rational(Numerator * other.Numerator, Denominator * other.Denominator);
+            return new Rational(Numerator * other.Numerator, Denominator * other.Denominator).ReducedForm;
         }
 
         public override Rational Clone()
         {
             return new Rational(Numerator, Denominator);
+        }
+
+        public static implicit operator Rational(int num)
+        {
+            return new Rational(num);
+        }
+
+        public static implicit operator Rational(long num)
+        {
+            return new Rational(num);
+        }
+
+        public static implicit operator double(Rational q)
+        {
+            return q.Value;
         }
 
         public override bool Equals(Rational other)
@@ -98,7 +126,16 @@ namespace RedMath.Structures
 
         public override string ToString()
         {
-            return Numerator + "/" + Denominator;
+            string str = "";
+
+            str += Numerator;
+
+            if (Denominator != 1)
+            {
+                str += "/" + Denominator;
+            }
+
+            return str;
         }
     }
 }

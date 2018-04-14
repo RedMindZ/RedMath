@@ -72,9 +72,10 @@ namespace RedMath
             return Math.Pow(a, 1 / n);
         }
 
-        public static Complex IntPower(Complex b, int n)
+        
+        public static T IntPower<T>(T b, int n) where T : Field<T>, new()
         {
-            Complex sum = new Complex(1, 0);
+            T sum = new T().One;
 
             if (n > 0)
             {
@@ -87,27 +88,41 @@ namespace RedMath
             return sum;
         }
 
-        public static long GreatestCommonDivisor(long a, long b)
+        public static long IntPower(int b, int n)
         {
-            a = Math.Abs(a);
-            b = Math.Abs(b);
+            long sum = 1;
 
-            if (b > a)
+            if (n > 0)
             {
-                long temp = a;
-                a = b;
-                b = temp;
+                for (int i = 0; i < n; i++)
+                {
+                    sum *= b;
+                }
             }
 
+            return sum;
+        }
 
-            while (b != 0)
+        public static long GreatestCommonDivisor(long left, long right)
+        {
+            left = Math.Abs(left);
+            right = Math.Abs(right);
+
+            if (right > left)
             {
-                long temp = b;
-                b = a % b;
-                a = temp;
+                long temp = left;
+                left = right;
+                right = temp;
             }
 
-            return a;
+            while (right != 0)
+            {
+                long temp = right;
+                right = left % right;
+                left = temp;
+            }
+
+            return left;
         }
     }
 }

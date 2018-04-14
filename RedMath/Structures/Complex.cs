@@ -109,22 +109,22 @@ namespace RedMath.Structures
 
         public static Complex operator +(Complex a, Complex b)
         {
-            return new Complex(a.Real + b.Real, a.Imaginary + b.Imaginary);
+            return a.Add(b);
         }
 
         public static Complex operator -(Complex a, Complex b)
         {
-            return new Complex(a.Real - b.Real, a.Imaginary - b.Imaginary);
+            return a.Subtract(b);
         }
 
         public static Complex operator *(Complex a, Complex b)
         {
-            return new Complex(a.Real * b.Real - a.Imaginary * b.Imaginary, a.Imaginary * b.Real + a.Real * b.Imaginary);
+            return a.Multiply(b);
         }
 
         public static Complex operator /(Complex a, Complex b)
         {
-            return new Complex((a.Real * b.Real + a.Imaginary * b.Imaginary) / (b.Real * b.Real + b.Imaginary * b.Imaginary), (a.Imaginary * b.Real - a.Real * b.Imaginary) / (b.Real * b.Real + b.Imaginary * b.Imaginary));
+            return a.Divide(b);
         }
 
         public static Complex operator -(Complex a)
@@ -237,14 +237,14 @@ namespace RedMath.Structures
             }
         }
 
-        public override Complex Add(Complex element)
+        public override Complex Add(Complex other)
         {
-            return this + element;
+            return new Complex(Real + other.Real, Imaginary + other.Imaginary);
         }
 
-        public override Complex Multiply(Complex element)
+        public override Complex Multiply(Complex other)
         {
-            return this * element;
+            return new Complex(Real * other.Real - Imaginary * other.Imaginary, Imaginary * other.Real + Real * other.Imaginary);
         }
 
         public override Complex Clone()
