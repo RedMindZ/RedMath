@@ -107,6 +107,7 @@ namespace RedMath.Structures
             }
         }
 
+        /*
         public static Complex operator +(Complex a, Complex b)
         {
             return a.Add(b);
@@ -131,6 +132,7 @@ namespace RedMath.Structures
         {
             return new Complex(-a.Real, -a.Imaginary);
         }
+        */
 
         public static bool operator ==(Complex a, Complex b)
         {

@@ -198,7 +198,7 @@ namespace RedMathTests
         public void TrasformationTest()
         {
             Debug.WriteLine("Matrix:");
-            Debug.WriteLine(MatrixTransformations.CreateLookAtMatrix(new Vector<Real>(1, 1, 1, 1), new Vector<Real>(2, 3, 2, 6), new Vector<Real>(0, 1, 0, 3), new Vector<Real>(1, 0, 3, 2)));
+            Debug.WriteLine(LinearTransformations.CreateLookAtMatrix(new Vector<Real>(1, 1, 1, 1), new Vector<Real>(2, 3, 2, 6), new Vector<Real>(0, 1, 0, 3), new Vector<Real>(1, 0, 3, 2)));
             Debug.WriteLine("");
         }
 

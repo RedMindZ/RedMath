@@ -11,6 +11,7 @@ using RedMath.Structures;
 using RedMath.LinearAlgebra;
 using RedMath.LinearAlgebra.MatrixOperations;
 using RedMath.Structures.Expression;
+using System.Threading;
 
 namespace ExecutionTest
 {
@@ -24,9 +25,77 @@ namespace ExecutionTest
         static void Main(string[] args)
         {
 
-            PermutationParityTest();
+            TestMatMul();
 
+            Console.WriteLine("The test is over. Press any key to continue...");
             Console.ReadKey();
+        }
+
+        private static void TestMatMul()
+        {
+            int testCount = 10000;
+            Stopwatch sw = new Stopwatch();
+
+            Rational[,] matData = new Rational[3, 3];
+            matData.Initialize((ind) => new Rational(ind[0] * matData.GetLength(0) + ind[1]));
+            Matrix<Rational> mat1 = new Matrix<Rational>(matData);
+            Matrix<Rational> mat2 = new Matrix<Rational>(mat1.Transposition);
+
+            Console.WriteLine("Multiplying matrices:");
+            Console.WriteLine(mat1);
+            Console.WriteLine("And:");
+            Console.WriteLine(mat2);
+            Console.WriteLine("For " + testCount + " times...");
+
+            sw.Start();
+
+            Matrix<Rational> res = null;
+            for (int i = 0; i < testCount; i++)
+            {
+                res = mat1 * mat2;
+            }
+
+            sw.Stop();
+
+            Console.WriteLine(res);
+            Console.WriteLine("Measured time: " + sw.Elapsed.TotalMilliseconds + "ms");
+            Console.WriteLine("Average time per operation: " + sw.Elapsed.TotalMilliseconds / testCount + "ms");
+            Console.WriteLine();
+
+
+            Console.WriteLine("Now testing with ParallelMultiply:");
+
+            sw.Restart();
+
+            for (int i = 0; i < testCount; i++)
+            {
+                res = Matrix<Rational>.ParallelMultiply(mat1, mat2);
+            }
+
+            sw.Stop();
+
+            Console.WriteLine(res);
+            Console.WriteLine("Measured time: " + sw.Elapsed.TotalMilliseconds + "ms");
+            Console.WriteLine("Average time per operation: " + sw.Elapsed.TotalMilliseconds / testCount + "ms");
+            Console.WriteLine();
+
+            Matrix<Real>.GpuMultiply<Rational, GpuRational>(mat1, mat2); // 'Warmup' the gpu
+
+            Console.WriteLine("Now testing with GPUMultiply:");
+
+            sw.Restart();
+
+            for (int i = 0; i < testCount; i++)
+            {
+                res = Matrix<Real>.GpuMultiply<Rational, GpuRational>(mat1, mat2);
+            }
+
+            sw.Stop();
+
+            Console.WriteLine(res);
+            Console.WriteLine("Measured time: " + sw.Elapsed.TotalMilliseconds + "ms");
+            Console.WriteLine("Average time per operation: " + sw.Elapsed.TotalMilliseconds / testCount + "ms");
+            Console.WriteLine();
         }
 
         private static void TestAliasing()
@@ -55,7 +124,7 @@ namespace ExecutionTest
             var det = m1.Determinant;
             var efro = m1.EchelonFormReductionOperations;
             var refro = m1.ReducedEchelonFormReductionOperations;
-            var ef =m1.EchelonForm;
+            var ef = m1.EchelonForm;
             var reef = m1.ReducedEchelonForm;
             var dec = m1.Decomposition;
             var ii = m1.IsIdentity;

@@ -1,15 +1,21 @@
-﻿using RedMath.Structures;
+﻿using Alea;
+using Alea.CSharp;
+using Alea.Parallel;
+using RedMath.GpuUtils;
 using RedMath.LinearAlgebra.MatrixOperations;
+using RedMath.Structures;
 using RedMath.Utils;
-
 using System;
 using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
 
 namespace RedMath.LinearAlgebra
 {
     public class Matrix<T> where T : Field<T>, new()
     {
         #region Class Fields
+        [GpuParam]
         protected T[,] definingArray;
 
         private static T fieldZero = new T().Zero;
@@ -740,94 +746,6 @@ namespace RedMath.LinearAlgebra
 
         private LUPDecomposition<T> computeDecomposition()
         {
-            /*Matrix<T> lowerMat = new Matrix<T>(Rows, Math.Min(Rows, Columns));
-            Matrix<T> upperMat = new Matrix<T>(Math.Min(Rows, Columns), Columns);
-            RowPermutation<T> perm = new RowPermutation<T>();
-
-            Matrix<T> temp = EchelonForm;
-
-            for (int i = 0; i < upperMat.Rows; i++)
-            {
-                for (int j = 0; j < upperMat.Columns; j++)
-                {
-                    upperMat[i, j] = temp[i, j];
-                }
-            }
-
-            for (int i = 0; i < Math.Min(lowerMat.Rows, lowerMat.Columns); i++)
-            {
-                lowerMat[i, i] = fieldOne.Clone();
-            }
-
-            List<MatrixOperation<T>> reductionOperations = EchelonFormReductionOperations;
-
-            for (int i = reductionOperations.Count - 1; i >= 0; i--)
-            {
-                reductionOperations[i].InverseApplyTo(lowerMat);
-            }
-
-            int fullRows = 0;
-            int zeroRows = 0;
-
-            for (int i = 0; i < lowerMat.Height; i++)
-            {
-                int j = lowerMat.Width - 1;
-                for (; j >= 0; j--)
-                {
-                    if (!lowerMat[i, j].Equals(fieldZero))
-                    {
-                        break;
-                    }
-                }
-
-                if (j == lowerMat.Width - 1)
-                {
-                    fullRows++;
-                }
-                else if (j == -1)
-                {
-                    zeroRows++;
-                }
-            }
-
-            int fullOffset = lowerMat.Height - (fullRows + zeroRows);
-            int zeroOffset = lowerMat.Height - zeroRows;
-
-            int fullCount = 0;
-            int zeroCount = 0;
-
-            for (int i = 0; i < lowerMat.Height; i++)
-            {
-                int j = lowerMat.Width - 1;
-                for (; j >= 0; j--)
-                {
-                    if (!lowerMat[i, j].Equals(fieldZero))
-                    {
-                        break;
-                    }
-                }
-
-                if (j == lowerMat.Width - 1)
-                {
-                    // Turn 'IndexList' to List<int>
-                    perm.IndexList.Add(fullOffset + fullCount);
-                    fullCount++;
-                }
-                else if (j == -1)
-                {
-                    perm.IndexList.Add(zeroOffset + zeroCount);
-                    zeroCount++;
-                }
-                else
-                {
-                    perm.IndexList.Add(j);
-                }
-            }
-
-            perm.ApplyTo(lowerMat);
-
-            return new Tuple<Matrix<T>, Matrix<T>, RowPermutation<T>>(lowerMat, upperMat, perm);*/
-
             return new LUPDecomposition<T>(this);
         }
 
@@ -843,7 +761,7 @@ namespace RedMath.LinearAlgebra
                 return this[0, 0];
             }
 
-            T det = Utilitys.SequenceProduct(Decomposition.LowerMatrix.MainDiagonal).Multiply(Utilitys.SequenceProduct(Decomposition.UpperMatrix.MainDiagonal));
+            T det = Decomposition.LowerMatrix.MainDiagonal.FieldProduct().Multiply(Decomposition.UpperMatrix.MainDiagonal.FieldProduct());
 
             if (Decomposition.Permutation.Signature == 1)
             {
@@ -936,6 +854,7 @@ namespace RedMath.LinearAlgebra
                 {
                     reductionOperations.Add(new AddRowMultiple<T>(baseRow, currentRow, reducedEchelonFormMatrix[currentRow, entryIndex].AdditiveInverse));
                     reductionOperations[reductionOperations.Count - 1].ApplyTo(reducedEchelonFormMatrix);
+
                     reducedEchelonFormMatrix[currentRow, entryIndex] = fieldZero.Clone(); // This line is in place to eliminate the possibility of rounding errors
                 }
             }
@@ -1127,30 +1046,152 @@ namespace RedMath.LinearAlgebra
                 throw new InvalidOperationException("Matrices of incompatible sizes can't be multiplied.");
             }
 
-            T[,] temp = new T[left.Height, right.Width];
-            T sum = new T().Zero;
+            T[,] multResult = new T[left.Height, right.Width];
 
-            for (int i = 0; i < temp.GetLength(0); i++)
+            for (int i = 0; i < multResult.GetLength(0); i++)
             {
-                for (int j = 0; j < temp.GetLength(1); j++)
+                for (int j = 0; j < multResult.GetLength(1); j++)
                 {
-                    sum = new T().Zero;
+                    multResult[i, j] = new T().Zero;
 
                     for (int k = 0; k < left.Width; k++)
                     {
-                        sum = sum.Add(left[i, k].Multiply(right[k, j]));
+                        multResult[i, j] += left.definingArray[i, k] * right.definingArray[k, j];
                     }
-
-                    temp[i, j] = sum;
                 }
             }
+
+            return new Matrix<T>(multResult);
+        }
+
+        /*
+         * Only effective on matrices that are at least 6x6
+         */
+        public static Matrix<T> ParallelMultiply(Matrix<T> left, Matrix<T> right)
+        {
+            if (left.Width != right.Height)
+            {
+                throw new InvalidOperationException("Matrices of incompatible sizes can't be multiplied.");
+            }
+
+            T[,] temp = new T[left.Height, right.Width];
+
+            Parallel.For(0, left.Height * right.Width, (index) =>
+            {
+                int rowIndex = index / left.Height;
+                int colIndex = index % right.Width;
+
+                temp[rowIndex, colIndex] = new T().Zero;
+
+                for (int k = 0; k < left.Width; k++)
+                {
+                    temp[rowIndex, colIndex] += left.definingArray[rowIndex, k] * right.definingArray[k, colIndex];
+                }
+            });
 
             return new Matrix<T>(temp);
         }
 
+        private static void MulKernel<U>(U[,] leftMat, U[,] rightMat, U[,] resultMat, Func<U, U, U> addOp, Func<U, U, U> mulOp)
+        {
+            int leftHeight = leftMat.GetLength(0);
+            int leftWidth = leftMat.GetLength(1);
+
+            int rightWidth = rightMat.GetLength(0);
+
+            int index = blockDim.x * blockIdx.x + threadIdx.x;
+            int rowIndex = index / leftHeight;
+            int colIndex = index % rightWidth;
+
+            if (rowIndex >= resultMat.GetLength(0) || colIndex >= resultMat.GetLength(1))
+            {
+                return;
+            }
+
+            for (int k = 0; k < leftWidth; k++)
+            {
+                /*var lv = leftMat[rowIndex, k];
+                var rv = rightMat[k, colIndex];
+                var mul = mulOp(lv, rv);
+                var tv = resultMat[rowIndex, colIndex];
+                var sum = addOp(tv, mul);
+
+                resultMat[rowIndex, colIndex] = sum;*/
+                resultMat[rowIndex, colIndex] = addOp(resultMat[rowIndex, colIndex], mulOp(leftMat[rowIndex, k], rightMat[k, colIndex]));
+            }
+        }
+
+        public static Matrix<FieldType> GpuMultiply<FieldType, GpuStructType>(Matrix<FieldType> left, Matrix<FieldType> right) where FieldType : Field<FieldType>, IGpuCompatible<FieldType, GpuStructType>, new() where GpuStructType : struct
+        {
+            if (left.Width != right.Height)
+            {
+                throw new InvalidOperationException("Matrices of incompatible sizes can't be multiplied.");
+            }
+
+            IGpuStructManager<FieldType, GpuStructType> gpuStructManager = new FieldType().GetDefaultGpuStructManager();
+
+            GpuStructType[,] resultArr = new GpuStructType[left.Rows, right.Columns];
+            GpuStructType[,] leftArr = new GpuStructType[left.Rows, left.Columns];
+            GpuStructType[,] rightArr = new GpuStructType[right.Rows, right.Columns];
+
+            resultArr.Initialize(gpuStructManager.GetStructDefaultValue());
+            leftArr.Initialize((ind) => gpuStructManager.ToStruct(left.definingArray[ind[0], ind[1]]));
+            rightArr.Initialize((ind) => gpuStructManager.ToStruct(right.definingArray[ind[0], ind[1]]));
+
+            
+            Gpu gpu = Gpu.Default;
+
+            int threadCount = left.Rows * right.Columns;
+            int blockDimX = gpu.Device.Attributes.MaxThreadsPerBlock; // Threads per block
+            int gridDimX = (int)Math.Ceiling((double)threadCount / blockDimX); // Blocks per thread
+
+            LaunchParam lp = new LaunchParam(gridDimX, blockDimX);
+            gpu.Launch(MulKernel, lp, leftArr, rightArr, resultArr, gpuStructManager.GetStructAddition(), gpuStructManager.GetStructMultiplication());
+            
+            /*var addOp = gpuStructManager.GetStructAddition();
+            var mulOp = gpuStructManager.GetStructMultiplication();
+            Gpu.Default.For(0, resultArr.GetLength(0) * resultArr.GetLength(1), (index) =>
+            {
+                int leftHeight = leftArr.GetLength(0);
+                int leftWidth = leftArr.GetLength(1);
+
+                int rightWidth = rightArr.GetLength(0);
+
+                int rowIndex = index / leftHeight;
+                int colIndex = index % rightWidth;
+
+                for (int k = 0; k < leftWidth; k++)
+                {
+                    var lv = leftArr[rowIndex, k];
+                    var rv = rightArr[k, colIndex];
+                    var mul = mulOp(lv, rv);
+                    var tv = resultArr[rowIndex, colIndex];
+                    var sum = addOp(tv, mul);
+
+                    resultArr[rowIndex, colIndex] = sum;
+                    //resultMat[rowIndex, colIndex] = addOp(resultMat[rowIndex, colIndex], mulOp(leftMat[rowIndex, k], rightMat[k, colIndex]));
+                }
+            });*/
+
+            FieldType[,] fieldResultArr = new FieldType[resultArr.GetLength(0), resultArr.GetLength(1)];
+            fieldResultArr.Initialize((ind) => gpuStructManager.ToClass(resultArr[ind[0], ind[1]]));
+
+            return new Matrix<FieldType>(fieldResultArr);
+        }
+
         public static implicit operator T[,] (Matrix<T> mat)
         {
-            return (T[,])(mat.definingArray.Clone());
+            T[,] defArrClone = new T[mat.Rows, mat.Columns];
+
+            for (int i = 0; i < mat.Rows; i++)
+            {
+                for (int j = 0; j < mat.Columns; j++)
+                {
+                    defArrClone[i, j] = mat[i, j].Clone();
+                }
+            }
+
+            return defArrClone;
         }
 
         public static bool operator ==(Matrix<T> left, Matrix<T> right)

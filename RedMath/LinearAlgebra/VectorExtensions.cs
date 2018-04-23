@@ -3,7 +3,7 @@ using System;
 
 namespace RedMath.LinearAlgebra
 {
-    public static class Extensions
+    public static class VectorExtensions
     {
         public static Vector<Real> GetNormalizedVector(this Vector<Real> vec)
         {

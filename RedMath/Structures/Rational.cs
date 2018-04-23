@@ -4,9 +4,11 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
+using RedMath.GpuUtils;
+
 namespace RedMath.Structures
 {
-    public class Rational : Field<Rational>
+    public class Rational : Field<Rational>, IGpuCompatible<Rational, GpuRational>
     {
         public long Numerator { get; set; }
 
@@ -26,7 +28,7 @@ namespace RedMath.Structures
                 }
                 else
                 {
-                    throw new ArgumentException("The value of a denominator must be greater or equal to one.");
+                    throw new ArgumentException("The value of a denominator must be different then zero.");
                 }
             }
         }
@@ -136,6 +138,59 @@ namespace RedMath.Structures
             }
 
             return str;
+        }
+
+        public IGpuStructManager<Rational, GpuRational> GetDefaultGpuStructManager()
+        {
+            return new RationalGpuTypeManager();
+        }
+    }
+
+    public struct GpuRational
+    {
+        public long Numerator;
+        public long Denominator;
+
+        public GpuRational(long numerator, long denominator)
+        {
+            Numerator = numerator;
+            Denominator = denominator;
+        }
+    }
+
+    public class RationalGpuTypeManager : IGpuStructManager<Rational, GpuRational>
+    {
+        public GpuRational ToStruct(Rational cl)
+        {
+            return new GpuRational(cl.Numerator, cl.Denominator);
+        }
+
+        public Rational ToClass(GpuRational st)
+        {
+            return new Rational(st.Numerator, st.Denominator);
+        }
+
+        Func<GpuRational, GpuRational, GpuRational> IStructureFieldOperations<GpuRational>.GetStructAddition()
+        {
+            return (left, right) => new GpuRational
+            {
+                Numerator = left.Numerator * right.Denominator + left.Denominator * right.Numerator,
+                Denominator = left.Denominator * right.Denominator
+            };
+        }
+
+        Func<GpuRational, GpuRational, GpuRational> IStructureFieldOperations<GpuRational>.GetStructMultiplication()
+        {
+            return (left, right) => new GpuRational
+            {
+                Numerator = left.Numerator * right.Numerator,
+                Denominator = left.Denominator * right.Denominator
+            };
+        }
+
+        public GpuRational GetStructDefaultValue()
+        {
+            return new GpuRational(0, 1);
         }
     }
 }

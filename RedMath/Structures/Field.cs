@@ -72,6 +72,11 @@ namespace RedMath.Structures
             return left.Divide(right);
         }
 
+        public static T operator -(Field<T> element)
+        {
+            return element.AdditiveInverse;
+        }
+
 
 
         public abstract T Clone();

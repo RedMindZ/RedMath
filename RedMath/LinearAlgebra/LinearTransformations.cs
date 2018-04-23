@@ -3,7 +3,7 @@ using System;
 
 namespace RedMath.LinearAlgebra
 {
-    public static class MatrixTransformations
+    public static class LinearTransformations
     {
         public static Matrix<Real> CreateRotationMatrix(Matrix<Real> axis, double angle, bool degrees = false)
         {

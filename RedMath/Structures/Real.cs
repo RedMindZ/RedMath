@@ -1,6 +1,9 @@
-﻿namespace RedMath.Structures
+﻿using System;
+using RedMath.GpuUtils;
+
+namespace RedMath.Structures
 {
-    public class Real : Field<Real>
+    public class Real : Field<Real>, IGpuCompatible<Real, GpuReal>
     {
         public double Value { get; set; }
 
@@ -52,28 +55,6 @@
         {
             Value = val;
         }
-
-        /*
-        public static Real operator +(Real a, Real b)
-        {
-            return new Real(a.Value + b.Value);
-        }
-
-        public static Real operator -(Real a, Real b)
-        {
-            return new Real(a.Value - b.Value);
-        }
-
-        public static Real operator *(Real a, Real b)
-        {
-            return new Real(a.Value * b.Value);
-        }
-
-        public static Real operator /(Real a, Real b)
-        {
-            return new Real(a.Value / b.Value);
-        }
-        */
 
         public static bool operator ==(Real a, Real b)
         {
@@ -140,6 +121,49 @@
         public override Real Clone()
         {
             return new Real(Value);
+        }
+
+        public IGpuStructManager<Real, GpuReal> GetDefaultGpuStructManager()
+        {
+            return new RealGpuTypeManager();
+        }
+    }
+
+    public struct GpuReal
+    {
+        public double Value;
+
+        public GpuReal(double value)
+        {
+            Value = value;
+        }
+    }
+
+    public class RealGpuTypeManager : IGpuStructManager<Real, GpuReal>
+    {
+        public Real ToClass(GpuReal st)
+        {
+            return new Real(st.Value);
+        }
+
+        public GpuReal ToStruct(Real cl)
+        {
+            return new GpuReal(cl.Value);
+        }
+
+        public Func<GpuReal, GpuReal, GpuReal> GetStructAddition()
+        {
+            return (left, right) => new GpuReal { Value = left.Value + right.Value };
+        }
+
+        public Func<GpuReal, GpuReal, GpuReal> GetStructMultiplication()
+        {
+            return (left, right) => new GpuReal { Value = left.Value * right.Value };
+        }
+
+        public GpuReal GetStructDefaultValue()
+        {
+            return new GpuReal(0);
         }
     }
 }
