@@ -92,7 +92,23 @@ namespace RedMath.Utils
                 }
             }
 
+            indices[indices.Length - 1] = fromInclusive[fromInclusive.Length - 1] - 1;
+
             return false;
+        }
+
+        public int ToInt()
+        {
+            int sum = indices[indices.Length - 1] - fromInclusive[fromInclusive.Length - 1];
+            int product = 1;
+
+            for (int i = indices.Length - 2; i >= 0; i--)
+            {
+                product *= (toExclusive[i + 1] - fromInclusive[i + 1]);
+                sum += (indices[i] - fromInclusive[i]) * product;
+            }
+
+            return sum;
         }
 
         public void Reset()

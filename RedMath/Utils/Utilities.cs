@@ -6,42 +6,7 @@ namespace RedMath.Utils
 {
     public static class Utilities
     {
-        private static int IndicesToInt(int[] indices, int[] limits)
-        {
-            int sum = indices[indices.Length - 1];
-            int mul = 1;
-
-            for (int i = indices.Length - 2; i >= 0; i--)
-            {
-                mul *= limits[i + 1];
-                sum += indices[i] * mul;
-            }
-
-            return sum;
-        }
-
-        private static bool IncrementIndices(int[] indices, int[] fromInclusive, int[] toExclusive)
-        {
-            if (indices.Length != fromInclusive.Length || indices.Length != toExclusive.Length)
-            {
-                throw new ArgumentException("All arrays passed to " + nameof(IncrementIndices) + " must be of the same length.");
-            }
-
-            for (int i = indices.Length - 1; i >= 0; i--)
-            {
-                if (indices[i] < toExclusive[i] - 1)
-                {
-                    indices[i]++;
-                    return true;
-                }
-                else
-                {
-                    indices[i] = fromInclusive[i];
-                }
-            }
-
-            return false;
-        }
+        
 
         public static T[] Slice<T>(this T[] source, int fromInclusive, int toExclusive)
         {
