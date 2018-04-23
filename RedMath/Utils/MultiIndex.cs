@@ -22,27 +22,12 @@ namespace RedMath.Utils
         private int[] steps;
         public ReadOnlyCollection<int> Steps { get; private set; }
 
-        public MultiIndex(int[] fromInclusiveArr, int[] toExclusiveArr, int[] stepsArr = null)
+        public MultiIndex(int[] toExclusiveArr, int[] fromInclusiveArr = null, int[] stepsArr = null)
         {
-            if (fromInclusiveArr.Length != toExclusiveArr.Length || (stepsArr != null && fromInclusiveArr.Length != stepsArr.Length))
+            if ((fromInclusiveArr != null && fromInclusiveArr.Length != toExclusiveArr.Length) || (stepsArr != null && fromInclusiveArr.Length != stepsArr.Length))
             {
                 throw new ArgumentException("The arrays " + nameof(fromInclusiveArr) + ", " + nameof(toExclusiveArr) + " and " + nameof(stepsArr) + " must be of the same length.");
             }
-
-            indices = new int[fromInclusiveArr.Length];
-            for (int i = 0; i < indices.Length; i++)
-            {
-                indices[i] = fromInclusiveArr[i];
-            }
-            indices[indices.Length - 1] = fromInclusiveArr[fromInclusiveArr.Length - 1] - 1;
-            Indices = new ReadOnlyCollection<int>(indices);
-
-            fromInclusive = new int[fromInclusiveArr.Length];
-            for (int i = 0; i < fromInclusive.Length; i++)
-            {
-                fromInclusive[i] = fromInclusiveArr[i];
-            }
-            FromInclusive = new ReadOnlyCollection<int>(fromInclusive);
 
             toExclusive = new int[toExclusiveArr.Length];
             for (int i = 0; i < toExclusive.Length; i++)
@@ -50,6 +35,31 @@ namespace RedMath.Utils
                 toExclusive[i] = toExclusiveArr[i];
             }
             ToExclusive = new ReadOnlyCollection<int>(toExclusive);
+
+            fromInclusive = new int[toExclusive.Length];
+            if (fromInclusiveArr == null)
+            {
+                for (int i = 0; i < fromInclusive.Length; i++)
+                {
+                    fromInclusive[i] = 0;
+                } 
+            }
+            else
+            {
+                for (int i = 0; i < fromInclusive.Length; i++)
+                {
+                    fromInclusive[i] = fromInclusiveArr[i];
+                }
+            }
+            FromInclusive = new ReadOnlyCollection<int>(fromInclusive);
+
+            indices = new int[fromInclusive.Length];
+            for (int i = 0; i < indices.Length; i++)
+            {
+                indices[i] = fromInclusive[i];
+            }
+            indices[indices.Length - 1] = fromInclusive[fromInclusive.Length - 1] - 1;
+            Indices = new ReadOnlyCollection<int>(indices);
 
             steps = new int[fromInclusive.Length];
             if (stepsArr == null)
@@ -126,11 +136,11 @@ namespace RedMath.Utils
         }
     }
 
-    public class MultiIndexEnumerator : IEnumerator<int[]>
+    public class MultiIndexEnumerator : IEnumerator<ReadOnlyCollection<int>>
     {
         private MultiIndex currentMIndex;
 
-        public int[] Current => currentMIndex.Indices.ToArray();
+        public ReadOnlyCollection<int> Current => currentMIndex.Indices;
 
         object IEnumerator.Current => Current;
 
