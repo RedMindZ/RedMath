@@ -93,7 +93,7 @@ namespace RedMath.LinearAlgebra
                 fromBasisMatrix.AppendColumnVector(vec);
             }
 
-            foreach (MatrixOperation<T> op in toBasisMatrix.ReducedEchelonFormReductionOperations)
+            foreach (IMatrixOperation<T> op in toBasisMatrix.ReducedEchelonFormReductionOperations)
             {
                 op.ApplyTo(fromBasisMatrix);
             }
@@ -114,7 +114,7 @@ namespace RedMath.LinearAlgebra
             }
 
             Matrix<T> reducedVec = vec.ToColumnMatrix();
-            foreach (MatrixOperation<T> op in basisMatrix.ReducedEchelonFormReductionOperations)
+            foreach (IMatrixOperation<T> op in basisMatrix.ReducedEchelonFormReductionOperations)
             {
                 op.ApplyTo(reducedVec);
             }
@@ -138,7 +138,7 @@ namespace RedMath.LinearAlgebra
             }
 
             Matrix<T> coordinatesVector = vec.ToColumnMatrix();
-            foreach (MatrixOperation<T> op in basisMatrix.ReducedEchelonFormReductionOperations)
+            foreach (IMatrixOperation<T> op in basisMatrix.ReducedEchelonFormReductionOperations)
             {
                 op.ApplyTo(coordinatesVector);
             }

@@ -8,7 +8,7 @@ using System.Threading.Tasks;
 
 namespace RedMath.Utils
 {
-    public class MultiIndex : IEnumerable
+    public class MultiIndex : IEnumerable<ReadOnlyCollection<int>>
     {
         private int[] indices;
         public ReadOnlyCollection<int> Indices { get; private set; }
@@ -130,7 +130,12 @@ namespace RedMath.Utils
             indices[indices.Length - 1] = fromInclusive[fromInclusive.Length - 1] - 1;
         }
 
-        public IEnumerator GetEnumerator()
+        public IEnumerator<ReadOnlyCollection<int>> GetEnumerator()
+        {
+            return new MultiIndexEnumerator(this);
+        }
+
+        IEnumerator IEnumerable.GetEnumerator()
         {
             return new MultiIndexEnumerator(this);
         }

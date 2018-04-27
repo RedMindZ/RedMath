@@ -37,7 +37,7 @@ namespace ExecutionTest
             Stopwatch sw = new Stopwatch();
 
             Rational[,] matData = new Rational[3, 3];
-            matData.Initialize((ind) => new Rational(ind[0] * matData.GetLength(0) + ind[1]));
+            matData.Assign(ind => new Rational(ind[0] * matData.GetLength(0) + ind[1]));
             Matrix<Rational> mat1 = new Matrix<Rational>(matData);
             Matrix<Rational> mat2 = new Matrix<Rational>(mat1.Transposition);
 
@@ -79,7 +79,7 @@ namespace ExecutionTest
             Console.WriteLine("Average time per operation: " + sw.Elapsed.TotalMilliseconds / testCount + "ms");
             Console.WriteLine();
 
-            Matrix<Real>.GpuMultiply<Rational, GpuRational>(mat1, mat2); // 'Warmup' the gpu
+            Matrix<Rational>.GpuMultiply<Rational, GpuRational>(mat1, mat2); // 'Warmup' the gpu
 
             Console.WriteLine("Now testing with GPUMultiply:");
 
@@ -128,7 +128,7 @@ namespace ExecutionTest
             var reef = m1.ReducedEchelonForm;
             var dec = m1.Decomposition;
             var ii = m1.IsIdentity;
-            //var cm =m1.CofactorMatrix;
+            //var cm = m1.CofactorMatrix;
             sw.Stop();
 
             if (print)

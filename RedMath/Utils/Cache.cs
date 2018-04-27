@@ -44,6 +44,10 @@ namespace RedMath.Utils
             {
                 item.UpdateRequired = updateRequired;
             }
+            else
+            {
+                throw new KeyNotFoundException("The cache does not contain the key '" + key + "'.");
+            }
         }
 
         public void SetAllUpdateStates(bool updateRequired)
@@ -74,9 +78,15 @@ namespace RedMath.Utils
 
                     return item.Value;
                 }
+                else
+                {
+                    throw new InvalidCastException("The backing dictionary of the cache contained an element that could not be cast to CacheItem. This exception may indicate an internal bug in the Cache class.");
+                }
             }
-
-            return default(TValue);
+            else
+            {
+                throw new KeyNotFoundException("The cache does not contain the key '" + key + "'.");
+            }
         }
     }
 }

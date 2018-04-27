@@ -14,14 +14,12 @@ namespace RedMath.LinearAlgebra
 
         public LUPDecomposition(Matrix<T> mat)
         {
-            UpperMatrix = new Matrix<T>(Math.Min(mat.Rows, mat.Columns), mat.Columns);
-            LowerMatrix = new Matrix<T>(mat.Rows, Math.Min(mat.Rows, mat.Columns));
-            Permutation = new RowPermutation<T>();
-
-            List<MatrixOperation<T>> reductionOps = new List<MatrixOperation<T>>(mat.EchelonFormReductionOperations);
-            reductionOps.Reverse();
-
             UpperMatrix = mat.EchelonForm;
+
+            LowerMatrix = new Matrix<T>(mat.Rows, Math.Min(mat.Rows, mat.Columns));
+
+            List<IMatrixOperation<T>> reductionOps = new List<IMatrixOperation<T>>(mat.EchelonFormReductionOperations);
+            reductionOps.Reverse();
 
             Field<T> fieldOne = new T().One;
             for (int i = 0; i < Math.Min(LowerMatrix.Rows, LowerMatrix.Columns); i++)
@@ -35,9 +33,9 @@ namespace RedMath.LinearAlgebra
                 permArr[i] = i;
             }
 
-            Permutation.IndexList = new List<int>(permArr);
+            Permutation = new RowPermutation<T>(permArr);
 
-            foreach (MatrixOperation<T> op in reductionOps)
+            foreach (IMatrixOperation<T> op in reductionOps)
             {
                 if (op is SwapRows<T> swapOp)
                 {

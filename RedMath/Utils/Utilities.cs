@@ -1,6 +1,7 @@
 ﻿using RedMath.LinearAlgebra;
 using RedMath.Structures;
 using System;
+using System.Linq;
 
 namespace RedMath.Utils
 {
@@ -49,12 +50,12 @@ namespace RedMath.Utils
             return prod;
         }
 
-        public static void Initialize<T>(this Array arr, T value)
+        public static void Assign<T>(this Array arr, T value)
         {
-            arr.Initialize((indArr) => value);
+            arr.Assign(indArr => value);
         }
 
-        public static void Initialize<T>(this Array arr, Func<int[], T> initFunc)
+        public static void Assign<T>(this Array arr, Func<int[], T> initFunc)
         {
             if (arr.GetType().GetElementType() != typeof(T))
             {
@@ -70,10 +71,11 @@ namespace RedMath.Utils
                 maxIndeces[i] = arr.GetUpperBound(i) + 1;
             }
 
-            MultiIndex mindex = new MultiIndex(minIndeces, maxIndeces);
+            MultiIndex mindex = new MultiIndex(maxIndeces, minIndeces);
 
-            foreach(int[] indices in mindex)
+            while(mindex.Increment())
             {
+                int[] indices = mindex.Indices.ToArray();
                 arr.SetValue(initFunc(indices), indices);
             }
         }

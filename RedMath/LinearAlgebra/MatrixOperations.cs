@@ -5,16 +5,16 @@ using RedMath.Structures;
 
 namespace RedMath.LinearAlgebra.MatrixOperations
 {
-    public interface MatrixOperation<T> where T : Field<T>, new()
+    public interface IMatrixOperation<T> where T : Field<T>, new()
     {
         void ApplyTo(Matrix<T> target);
         void InverseApplyTo(Matrix<T> target);
     }
 
-    public class SwapRows<T> : MatrixOperation<T> where T : Field<T>, new()
+    public class SwapRows<T> : IMatrixOperation<T> where T : Field<T>, new()
     {
-        public int FirstRowIndex { get; set; }
-        public int SecondRowIndex { get; set; }
+        public int FirstRowIndex { get; }
+        public int SecondRowIndex { get; }
 
         public SwapRows(int firstRowIndex, int secondRowIndex)
         {
@@ -43,10 +43,10 @@ namespace RedMath.LinearAlgebra.MatrixOperations
         }
     }
 
-    public class SwapColumns<T> : MatrixOperation<T> where T : Field<T>, new()
+    public class SwapColumns<T> : IMatrixOperation<T> where T : Field<T>, new()
     {
-        public int FirstColumnIndex { get; set; }
-        public int SecondColumnIndex { get; set; }
+        public int FirstColumnIndex { get; }
+        public int SecondColumnIndex { get; }
 
         public SwapColumns(int firstColumnIndex, int secondColumnIndex)
         {
@@ -75,10 +75,10 @@ namespace RedMath.LinearAlgebra.MatrixOperations
         }
     }
 
-    public class MultiplyRowByScalar<T> : MatrixOperation<T> where T : Field<T>, new()
+    public class MultiplyRowByScalar<T> : IMatrixOperation<T> where T : Field<T>, new()
     {
-        public int RowIndex { get; set; }
-        public T Scalar { get; set; }
+        public int RowIndex { get; }
+        public T Scalar { get; }
 
         public MultiplyRowByScalar(int rowIndex, T scalar)
         {
@@ -108,11 +108,11 @@ namespace RedMath.LinearAlgebra.MatrixOperations
         }
     }
 
-    public class AddRowMultiple<T> : MatrixOperation<T> where T : Field<T>, new()
+    public class AddRowMultiple<T> : IMatrixOperation<T> where T : Field<T>, new()
     {
-        public int BaseRowIndex { get; set; }
-        public int TargetRowIndex { get; set; }
-        public T Scalar { get; set; }
+        public int BaseRowIndex { get; }
+        public int TargetRowIndex { get; }
+        public T Scalar { get; }
 
         public AddRowMultiple(int baseRowIndex, int targetRowIndex, T scalar)
         {
@@ -143,9 +143,9 @@ namespace RedMath.LinearAlgebra.MatrixOperations
         }
     }
 
-    public class RowPermutation<T> : MatrixOperation<T> where T : Field<T>, new()
+    public class RowPermutation<T> : IMatrixOperation<T> where T : Field<T>, new()
     {
-        public List<int> IndexList;
+        public List<int> IndexList { get; }
 
         public int Signature
         {
@@ -227,9 +227,9 @@ namespace RedMath.LinearAlgebra.MatrixOperations
         }
     }
 
-    public class ColumnPermutation<T> : MatrixOperation<T> where T : Field<T>, new()
+    public class ColumnPermutation<T> : IMatrixOperation<T> where T : Field<T>, new()
     {
-        public List<int> IndexList { get; set; }
+        public List<int> IndexList { get; }
 
         public ColumnPermutation(params int[] indices)
         {
