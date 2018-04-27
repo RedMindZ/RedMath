@@ -128,16 +128,6 @@ namespace RedMath.LinearAlgebra
 
             definingArray.Assign(ind => fieldZero.Clone());
 
-            /*
-            for (int i = 0; i < Height; i++)
-            {
-                for (int j = 0; j < Width; j++)
-                {
-                    definingArray[i, j] = fieldZero.Clone();
-                }
-            }
-            */
-
             initCache();
         }
 
@@ -146,15 +136,6 @@ namespace RedMath.LinearAlgebra
             definingArray = new T[data.GetLength(0), data.GetLength(1)];
 
             definingArray.Assign(ind => data[ind[0], ind[1]].Clone());
-
-            /*
-            for (int row = 0; row < data.GetLength(0); row++)
-            {
-                for (int col = 0; col < data.GetLength(1); col++)
-                {
-                    definingArray[row, col] = data[row, col].Clone();
-                }
-            }*/
 
             initCache();
         }
@@ -244,16 +225,6 @@ namespace RedMath.LinearAlgebra
 
             temp.Assign(ind => definingArray[ind[1], ind[0]]);
 
-            /*
-            for (int i = 0; i < Height; i++)
-            {
-                for (int j = 0; j < Width; j++)
-                {
-                    temp[j, i] = definingArray[i, j];
-                }
-            }
-            */
-
             definingArray = temp;
 
             computationCache.SetAllUpdateStates(true);
@@ -265,13 +236,6 @@ namespace RedMath.LinearAlgebra
 
             res.Assign(ind => definingArray[index, ind[0]].Clone());
 
-            /*
-            for (int i = 0; i < res.Length; i++)
-            {
-                res[i] = definingArray[index, i].Clone();
-            }
-            */
-
             return new Vector<T>(res);
         }
 
@@ -280,13 +244,6 @@ namespace RedMath.LinearAlgebra
             T[] res = new T[Height];
 
             res.Assign(ind => definingArray[ind[0], index].Clone());
-
-            /*
-            for (int i = 0; i < res.Length; i++)
-            {
-                res[i] = definingArray[i, index].Clone();
-            }
-            */
 
             return new Vector<T>(res);
         }
@@ -461,15 +418,6 @@ namespace RedMath.LinearAlgebra
             T[,] cofactorMat = new T[Rows, Columns];
 
             cofactorMat.Assign(ind => Cofactor(ind[0], ind[1]));
-
-            /*
-            for (int i = 0; i < cofactorMat.Height; i++)
-            {
-                for (int j = 0; j < cofactorMat.Width; j++)
-                {
-                    cofactorMat[i, j] = Cofactor(i, j);
-                }
-            }*/
 
             return new Matrix<T>(cofactorMat);
         }
@@ -737,16 +685,6 @@ namespace RedMath.LinearAlgebra
 
             temp.Assign(ind => left[ind[0], ind[1]] + right[ind[0], ind[1]]);
             
-            /*
-            for (int i = 0; i < left.Height; i++)
-            {
-                for (int j = 0; j < left.Width; j++)
-                {
-                    temp[i, j] = left[i, j].Add(right[i, j]);
-                }
-            }
-            */
-
             return new Matrix<T>(temp);
         }
 
@@ -761,16 +699,6 @@ namespace RedMath.LinearAlgebra
 
             temp.Assign(ind => left[ind[0], ind[1]] - right[ind[0], ind[1]]);
 
-            /*
-            for (int i = 0; i < left.Height; i++)
-            {
-                for (int j = 0; j < left.Width; j++)
-                {
-                    temp[i, j] = left[i, j].Subtract(right[i, j]);
-                }
-            }
-            */
-
             return new Matrix<T>(temp);
         }
 
@@ -780,16 +708,6 @@ namespace RedMath.LinearAlgebra
 
             temp.Assign(ind => -mat[ind[0], ind[1]]);
 
-            /*
-            for (int i = 0; i < mat.Height; i++)
-            {
-                for (int j = 0; j < mat.Width; j++)
-                {
-                    temp[i, j] = mat[i, j].AdditiveInverse;
-                }
-            }
-            */
-
             return new Matrix<T>(temp);
         }
 
@@ -798,16 +716,6 @@ namespace RedMath.LinearAlgebra
             T[,] temp = new T[mat.Height, mat.Width];
 
             temp.Assign(ind => mat[ind[0], ind[1]] * scalar);
-
-            /*
-            for (int i = 0; i < mat.Height; i++)
-            {
-                for (int j = 0; j < mat.Width; j++)
-                {
-                    temp[i, j] = mat[i, j].Multiply(scalar);
-                }
-            }
-            */
 
             return new Matrix<T>(temp);
         }
@@ -842,21 +750,6 @@ namespace RedMath.LinearAlgebra
 
                 return sum;
             });
-
-            /*
-            for (int i = 0; i < multResult.GetLength(0); i++)
-            {
-                for (int j = 0; j < multResult.GetLength(1); j++)
-                {
-                    multResult[i, j] = new T().Zero;
-
-                    for (int k = 0; k < left.Width; k++)
-                    {
-                        multResult[i, j] += left.definingArray[i, k] * right.definingArray[k, j];
-                    }
-                }
-            }
-            */
 
             return new Matrix<T>(multResult);
         }
