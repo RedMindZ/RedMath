@@ -1,15 +1,10 @@
-﻿using Alea;
-using Alea.CSharp;
-using Alea.Parallel;
+﻿using System;
+using System.Collections.Generic;
+using System.Text;
+
 using RedMath.LinearAlgebra.MatrixOperations;
-using RedMath.ParallelComputation.GpuUtils;
 using RedMath.Structures;
 using RedMath.Utils;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace RedMath.LinearAlgebra
 {

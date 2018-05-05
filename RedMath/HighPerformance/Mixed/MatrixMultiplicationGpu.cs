@@ -1,44 +1,17 @@
 ﻿using System;
-using System.Threading.Tasks;
 
 using Alea;
 using Alea.CSharp;
 
 using RedMath.LinearAlgebra;
 using RedMath.Structures;
-using RedMath.ParallelComputation.GpuUtils;
 using RedMath.Utils;
+using RedMath.HighPerformance.Gpu;
 
-namespace RedMath.ParallelComputation
+namespace RedMath.HighPerformance.Mixed
 {
-    public static class MatrixMultiplication
+    public static partial class MatrixMultiplication
     {
-        public static Matrix<T> ParallelMultiply<T>(Matrix<T> left, Matrix<T> right) where T : Field<T>, new()
-        {
-            if (left.Width != right.Height)
-            {
-                throw new InvalidOperationException("Matrices of incompatible sizes can't be multiplied.");
-            }
-
-            T[,] temp = new T[left.Height, right.Width];
-            T fieldZero = new T().Zero;
-
-            Parallel.For(0, left.Height * right.Width, (index) =>
-            {
-                int rowIndex = index / left.Height;
-                int colIndex = index % right.Width;
-
-                temp[rowIndex, colIndex] = fieldZero.Clone();
-
-                for (int k = 0; k < left.Width; k++)
-                {
-                    temp[rowIndex, colIndex] += left[rowIndex, k] * right[k, colIndex];
-                }
-            });
-
-            return new Matrix<T>(temp);
-        }
-
         public static Matrix<FieldType> GpuMultiply<FieldType, GpuStructType>(Matrix<FieldType> left, Matrix<FieldType> right) where FieldType : Field<FieldType>, IGpuCompatibleField<FieldType, GpuStructType>, new() where GpuStructType : struct
         {
             if (left.Width != right.Height)
@@ -57,7 +30,7 @@ namespace RedMath.ParallelComputation
             rightArr.Assign(ind => gpuStructManager.ToStruct(right[ind[0], ind[1]]));
 
 
-            Gpu gpu = Gpu.Default;
+            Alea.Gpu gpu = Alea.Gpu.Default;
 
             int threadCount = left.Rows * right.Columns;
             int blockDimX = gpu.Device.Attributes.MaxThreadsPerBlock; // Threads per block

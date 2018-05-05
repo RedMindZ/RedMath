@@ -1,5 +1,6 @@
 ﻿using System;
-using RedMath.ParallelComputation.GpuUtils;
+
+using RedMath.HighPerformance.Gpu;
 
 namespace RedMath.Structures
 {

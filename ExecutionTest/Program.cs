@@ -4,7 +4,6 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Diagnostics;
-using RedMath.ParallelComputation.GpuUtils;
 
 using RedMath;
 using RedMath.Utils;
@@ -12,7 +11,7 @@ using RedMath.Structures;
 using RedMath.LinearAlgebra;
 using RedMath.LinearAlgebra.MatrixOperations;
 using RedMath.Structures.Expression;
-using RedMath.ParallelComputation;
+using RedMath.HighPerformance.Mixed;
 using System.Threading;
 
 namespace ExecutionTest
