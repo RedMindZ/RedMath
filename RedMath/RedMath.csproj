@@ -33,9 +33,10 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
+    <!-- C# source files -->
     <Compile Include="Algebra.cs" />
     <Compile Include="FFT.cs" />
-    <Compile Include="GpuUtils\GpuCompatibility.cs" />
+    <Compile Include="ParallelComputation\GpuUtils\GpuCompatibility.cs" />
     <Compile Include="LinearAlgebra\VectorExtensions.cs" />
     <Compile Include="LinearAlgebra\Matrix.cs" />
     <Compile Include="LinearAlgebra\LUPDecomposition.cs" />
@@ -43,6 +44,7 @@
     <Compile Include="LinearAlgebra\LinearTransformations.cs" />
     <Compile Include="LinearAlgebra\Vector.cs" />
     <Compile Include="LinearAlgebra\VectorSpace.cs" />
+    <Compile Include="ParallelComputation\MatrixMultiplication.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Structures\Complex.cs" />
     <Compile Include="Structures\Expression\ExpressionNode.cs" />
@@ -54,6 +56,7 @@
     <Compile Include="Utils\Cache.cs" />
   </ItemGroup>
   <ItemGroup>
+    <!-- References; Currently AleaGPU and System -->
     <Reference Include="Alea, Version=3.0.0.0, Culture=neutral, PublicKeyToken=ba52afc3c2e933d6, processorArchitecture=MSIL">
       <HintPath>..\packages\Alea.3.0.4\lib\net45\Alea.dll</HintPath>
     </Reference>
@@ -63,15 +66,21 @@
     <Reference Include="Alea.Parallel, Version=3.0.0.0, Culture=neutral, PublicKeyToken=ba52afc3c2e933d6, processorArchitecture=MSIL">
       <HintPath>..\packages\Alea.3.0.4\lib\net45\Alea.Parallel.dll</HintPath>
     </Reference>
+    <Reference Include="Microsoft.VisualStudio.DebuggerVisualizers, Version=15.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL" />
     <Reference Include="System" />
+    <Reference Include="System.Drawing" />
+    <Reference Include="System.Windows.Forms" />
   </ItemGroup>
   <ItemGroup>
+    <!-- All empty folders -->
     <Folder Include="Geometry\" />
   </ItemGroup>
   <ItemGroup>
+    <!-- NuGet packages include -->
     <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
+    <!-- AleaGPU specific files -->
     <Content Include="FodyWeavers.xml" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

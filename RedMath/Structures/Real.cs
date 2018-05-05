@@ -1,9 +1,9 @@
 ﻿using System;
-using RedMath.GpuUtils;
+using RedMath.ParallelComputation.GpuUtils;
 
 namespace RedMath.Structures
 {
-    public class Real : Field<Real>, IGpuCompatible<Real, GpuReal>
+    public class Real : Field<Real>, IGpuCompatibleField<Real, GpuReal>
     {
         public double Value { get; set; }
 
@@ -41,7 +41,7 @@ namespace RedMath.Structures
                 }
                 else
                 {
-                    throw new System.DivideByZeroException();
+                    throw new DivideByZeroException("Zero has no multiplicative inverse.");
                 }
             }
         }

@@ -4,11 +4,11 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-using RedMath.GpuUtils;
+using RedMath.ParallelComputation.GpuUtils;
 
 namespace RedMath.Structures
 {
-    public class Rational : Field<Rational>, IGpuCompatible<Rational, GpuRational>
+    public class Rational : Field<Rational>, IGpuCompatibleField<Rational, GpuRational>
     {
         public long Numerator { get; set; }
 
@@ -170,7 +170,7 @@ namespace RedMath.Structures
             return new Rational(st.Numerator, st.Denominator);
         }
 
-        Func<GpuRational, GpuRational, GpuRational> IStructureFieldOperations<GpuRational>.GetStructAddition()
+        Func<GpuRational, GpuRational, GpuRational> IFieldStruct<GpuRational>.GetStructAddition()
         {
             return (left, right) => new GpuRational
             {
@@ -179,7 +179,7 @@ namespace RedMath.Structures
             };
         }
 
-        Func<GpuRational, GpuRational, GpuRational> IStructureFieldOperations<GpuRational>.GetStructMultiplication()
+        Func<GpuRational, GpuRational, GpuRational> IFieldStruct<GpuRational>.GetStructMultiplication()
         {
             return (left, right) => new GpuRational
             {

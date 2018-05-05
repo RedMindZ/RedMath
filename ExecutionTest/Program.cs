@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Diagnostics;
+using RedMath.ParallelComputation.GpuUtils;
 
 using RedMath;
 using RedMath.Utils;
@@ -11,6 +12,7 @@ using RedMath.Structures;
 using RedMath.LinearAlgebra;
 using RedMath.LinearAlgebra.MatrixOperations;
 using RedMath.Structures.Expression;
+using RedMath.ParallelComputation;
 using System.Threading;
 
 namespace ExecutionTest
@@ -69,7 +71,7 @@ namespace ExecutionTest
 
             for (int i = 0; i < testCount; i++)
             {
-                res = Matrix<Rational>.ParallelMultiply(mat1, mat2);
+                res = MatrixMultiplication.ParallelMultiply(mat1, mat2);
             }
 
             sw.Stop();
@@ -79,7 +81,7 @@ namespace ExecutionTest
             Console.WriteLine("Average time per operation: " + sw.Elapsed.TotalMilliseconds / testCount + "ms");
             Console.WriteLine();
 
-            Matrix<Rational>.GpuMultiply<Rational, GpuRational>(mat1, mat2); // 'Warmup' the gpu
+            MatrixMultiplication.GpuMultiply<Rational, GpuRational>(mat1, mat2); // 'Warmup' the gpu
 
             Console.WriteLine("Now testing with GPUMultiply:");
 
@@ -87,7 +89,7 @@ namespace ExecutionTest
 
             for (int i = 0; i < testCount; i++)
             {
-                res = Matrix<Real>.GpuMultiply<Rational, GpuRational>(mat1, mat2);
+                res = MatrixMultiplication.GpuMultiply<Rational, GpuRational>(mat1, mat2);
             }
 
             sw.Stop();

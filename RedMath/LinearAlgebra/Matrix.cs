@@ -1,8 +1,8 @@
 ﻿using Alea;
 using Alea.CSharp;
 using Alea.Parallel;
-using RedMath.GpuUtils;
 using RedMath.LinearAlgebra.MatrixOperations;
+using RedMath.ParallelComputation.GpuUtils;
 using RedMath.Structures;
 using RedMath.Utils;
 using System;
@@ -752,89 +752,6 @@ namespace RedMath.LinearAlgebra
             });
 
             return new Matrix<T>(multResult);
-        }
-
-        /*
-         * Only effective on matrices that are at least 6x6
-         */
-        public static Matrix<T> ParallelMultiply(Matrix<T> left, Matrix<T> right)
-        {
-            if (left.Width != right.Height)
-            {
-                throw new InvalidOperationException("Matrices of incompatible sizes can't be multiplied.");
-            }
-
-            T[,] temp = new T[left.Height, right.Width];
-
-            Parallel.For(0, left.Height * right.Width, (index) =>
-            {
-                int rowIndex = index / left.Height;
-                int colIndex = index % right.Width;
-
-                temp[rowIndex, colIndex] = fieldZero.Clone();
-
-                for (int k = 0; k < left.Width; k++)
-                {
-                    temp[rowIndex, colIndex] += left.definingArray[rowIndex, k] * right.definingArray[k, colIndex];
-                }
-            });
-
-            return new Matrix<T>(temp);
-        }
-
-        private static void MulKernel<U>(U[,] leftMat, U[,] rightMat, U[,] resultMat, Func<U, U, U> addOp, Func<U, U, U> mulOp)
-        {
-            int leftHeight = leftMat.GetLength(0);
-            int leftWidth = leftMat.GetLength(1);
-
-            int rightWidth = rightMat.GetLength(0);
-
-            int index = blockDim.x * blockIdx.x + threadIdx.x;
-            int rowIndex = index / leftHeight;
-            int colIndex = index % rightWidth;
-
-            if (rowIndex >= resultMat.GetLength(0) || colIndex >= resultMat.GetLength(1))
-            {
-                return;
-            }
-
-            for (int k = 0; k < leftWidth; k++)
-            {
-                resultMat[rowIndex, colIndex] = addOp(resultMat[rowIndex, colIndex], mulOp(leftMat[rowIndex, k], rightMat[k, colIndex]));
-            }
-        }
-
-        public static Matrix<FieldType> GpuMultiply<FieldType, GpuStructType>(Matrix<FieldType> left, Matrix<FieldType> right) where FieldType : Field<FieldType>, IGpuCompatible<FieldType, GpuStructType>, new() where GpuStructType : struct
-        {
-            if (left.Width != right.Height)
-            {
-                throw new InvalidOperationException("Matrices of incompatible sizes can't be multiplied.");
-            }
-
-            IGpuStructManager<FieldType, GpuStructType> gpuStructManager = new FieldType().GetDefaultGpuStructManager();
-
-            GpuStructType[,] resultArr = new GpuStructType[left.Rows, right.Columns];
-            GpuStructType[,] leftArr = new GpuStructType[left.Rows, left.Columns];
-            GpuStructType[,] rightArr = new GpuStructType[right.Rows, right.Columns];
-
-            resultArr.Assign(gpuStructManager.GetStructDefaultValue());
-            leftArr.Assign(ind => gpuStructManager.ToStruct(left.definingArray[ind[0], ind[1]]));
-            rightArr.Assign(ind => gpuStructManager.ToStruct(right.definingArray[ind[0], ind[1]]));
-
-
-            Gpu gpu = Gpu.Default;
-
-            int threadCount = left.Rows * right.Columns;
-            int blockDimX = gpu.Device.Attributes.MaxThreadsPerBlock; // Threads per block
-            int gridDimX = (int)Math.Ceiling((double)threadCount / blockDimX); // Blocks per thread
-
-            LaunchParam lp = new LaunchParam(gridDimX, blockDimX);
-            gpu.Launch(MulKernel, lp, leftArr, rightArr, resultArr, gpuStructManager.GetStructAddition(), gpuStructManager.GetStructMultiplication());
-
-            FieldType[,] fieldResultArr = new FieldType[resultArr.GetLength(0), resultArr.GetLength(1)];
-            fieldResultArr.Assign(ind => gpuStructManager.ToClass(resultArr[ind[0], ind[1]]));
-
-            return new Matrix<FieldType>(fieldResultArr);
         }
 
         public static implicit operator T[,] (Matrix<T> mat)
