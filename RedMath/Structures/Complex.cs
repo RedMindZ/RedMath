@@ -3,7 +3,7 @@ using RedMath.LinearAlgebra;
 
 namespace RedMath.Structures
 {
-    public class Complex : Field<Complex>
+    public partial class Complex : Field<Complex>
     {
         public double Real { get; set; }
         public double Imaginary { get; set; }
@@ -106,33 +106,6 @@ namespace RedMath.Structures
                 return new Complex(Real, -Imaginary);
             }
         }
-
-        /*
-        public static Complex operator +(Complex a, Complex b)
-        {
-            return a.Add(b);
-        }
-
-        public static Complex operator -(Complex a, Complex b)
-        {
-            return a.Subtract(b);
-        }
-
-        public static Complex operator *(Complex a, Complex b)
-        {
-            return a.Multiply(b);
-        }
-
-        public static Complex operator /(Complex a, Complex b)
-        {
-            return a.Divide(b);
-        }
-
-        public static Complex operator -(Complex a)
-        {
-            return new Complex(-a.Real, -a.Imaginary);
-        }
-        */
 
         public static bool operator ==(Complex a, Complex b)
         {

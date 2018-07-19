@@ -1,10 +1,8 @@
 ﻿using System;
 
-using RedMath.HighPerformance.Gpu;
-
 namespace RedMath.Structures
 {
-    public class Real : Field<Real>, IGpuCompatibleField<Real, GpuReal>
+    public partial class Real : Field<Real>
     {
         public double Value { get; set; }
 
@@ -28,7 +26,7 @@ namespace RedMath.Structures
         {
             get
             {
-                return -this;
+                return new Real(-Value);
             }
         }
 
@@ -122,49 +120,6 @@ namespace RedMath.Structures
         public override Real Clone()
         {
             return new Real(Value);
-        }
-
-        public IGpuStructManager<Real, GpuReal> GetDefaultGpuStructManager()
-        {
-            return new RealGpuTypeManager();
-        }
-    }
-
-    public struct GpuReal
-    {
-        public double Value;
-
-        public GpuReal(double value)
-        {
-            Value = value;
-        }
-    }
-
-    public class RealGpuTypeManager : IGpuStructManager<Real, GpuReal>
-    {
-        public Real ToClass(GpuReal st)
-        {
-            return new Real(st.Value);
-        }
-
-        public GpuReal ToStruct(Real cl)
-        {
-            return new GpuReal(cl.Value);
-        }
-
-        public Func<GpuReal, GpuReal, GpuReal> GetStructAddition()
-        {
-            return (left, right) => new GpuReal { Value = left.Value + right.Value };
-        }
-
-        public Func<GpuReal, GpuReal, GpuReal> GetStructMultiplication()
-        {
-            return (left, right) => new GpuReal { Value = left.Value * right.Value };
-        }
-
-        public GpuReal GetStructDefaultValue()
-        {
-            return new GpuReal(0);
         }
     }
 }

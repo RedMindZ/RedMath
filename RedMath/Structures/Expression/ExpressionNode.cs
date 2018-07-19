@@ -16,7 +16,7 @@ namespace RedMath.Structures.Expression
         public BaseExpressionNode<LChildType> LeftChild { get; set; }
         public BaseExpressionNode<RChildType> RightChild { get; set; }
 
-        protected string wrapString(string str)
+        protected string WrapString(string str)
         {
             return "(" + LeftChild.ToString() + ")" + " " + str + " " + "(" + RightChild.ToString() + ")";
         }
@@ -46,12 +46,12 @@ namespace RedMath.Structures.Expression
     {
         public override T Evaluate()
         {
-            return Field<T>.Add(LeftChild.Evaluate(), RightChild.Evaluate());
+            return LeftChild.Evaluate() + RightChild.Evaluate();
         }
 
         public override string ToString()
         {
-            return wrapString("+");
+            return WrapString("+");
         }
     }
 
@@ -59,12 +59,12 @@ namespace RedMath.Structures.Expression
     {
         public override T Evaluate()
         {
-            return Field<T>.Multiply(LeftChild.Evaluate(), RightChild.Evaluate());
+            return LeftChild.Evaluate() * RightChild.Evaluate();
         }
 
         public override string ToString()
         {
-            return wrapString("*");
+            return WrapString("*");
         }
     }
 
@@ -72,12 +72,12 @@ namespace RedMath.Structures.Expression
     {
         public override T Evaluate()
         {
-            return Field<T>.Subtract(LeftChild.Evaluate(), RightChild.Evaluate());
+            return LeftChild.Evaluate() - RightChild.Evaluate();
         }
 
         public override string ToString()
         {
-            return wrapString("-");
+            return WrapString("-");
         }
     }
 
@@ -85,12 +85,12 @@ namespace RedMath.Structures.Expression
     {
         public override T Evaluate()
         {
-            return Field<T>.Divide(LeftChild.Evaluate(), RightChild.Evaluate());
+            return LeftChild.Evaluate() / RightChild.Evaluate();
         }
 
         public override string ToString()
         {
-            return wrapString("/");
+            return WrapString("/");
         }
     }
 }

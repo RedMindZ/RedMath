@@ -10,112 +10,162 @@ namespace RedMath.Utils
 {
     public class MultiIndex : IEnumerable<ReadOnlyCollection<int>>
     {
-        private int[] indices;
+        private int[] _indices;
         public ReadOnlyCollection<int> Indices { get; private set; }
 
-        private int[] fromInclusive;
+        private int[] _fromInclusive;
         public ReadOnlyCollection<int> FromInclusive { get; private set; }
 
-        private int[] toExclusive;
+        private int[] _toExclusive;
         public ReadOnlyCollection<int> ToExclusive { get; private set; }
 
-        private int[] steps;
+        private int[] _steps;
         public ReadOnlyCollection<int> Steps { get; private set; }
 
-        public MultiIndex(int[] toExclusiveArr, int[] fromInclusiveArr = null, int[] stepsArr = null)
+        public MultiIndex(int[] toExclusiveArr)
         {
-            if ((fromInclusiveArr != null && fromInclusiveArr.Length != toExclusiveArr.Length) || (stepsArr != null && fromInclusiveArr.Length != stepsArr.Length))
+            if (toExclusiveArr == null)
+            {
+                throw new ArgumentNullException("The array " + nameof(toExclusiveArr) + " must not be 'null'.", (Exception)null);
+            }
+
+            int[] fromInclusiveArr = new int[toExclusiveArr.Length];
+            int[] stepsArr = new int[toExclusiveArr.Length];
+            for (int i = 0; i < toExclusiveArr.Length; i++)
+            {
+                fromInclusiveArr[i] = 0;
+                stepsArr[i] = 1;
+            }
+
+            Init(fromInclusiveArr, toExclusiveArr, stepsArr);
+        }
+
+        public MultiIndex(int[] fromInclusiveArr, int[] toExclusiveArr)
+        {
+            if (fromInclusiveArr == null || toExclusiveArr == null)
+            {
+                throw new ArgumentNullException("The arrays " + nameof(fromInclusiveArr) + " and " + nameof(toExclusiveArr) + " must not be 'null'.", (Exception)null);
+            }
+
+            if (toExclusiveArr.Length != fromInclusiveArr.Length)
+            {
+                throw new ArgumentException("The arrays " + nameof(fromInclusiveArr) + " and " + nameof(toExclusiveArr) + " must be of the same length.");
+            }
+
+            int[] stepsArr = new int[fromInclusiveArr.Length];
+            for (int i = 0; i < stepsArr.Length; i++)
+            {
+                stepsArr[i] = 1;
+            }
+
+            Init(fromInclusiveArr, toExclusiveArr, stepsArr);
+        }
+
+        public MultiIndex(int[] fromInclusiveArr, int[] toExclusiveArr, int[] stepsArr)
+        {
+            if (fromInclusiveArr == null || toExclusiveArr == null || stepsArr == null)
+            {
+                throw new ArgumentNullException("The arrays " + nameof(fromInclusiveArr) + ", " + nameof(toExclusiveArr) + " and " + nameof(stepsArr) + " must not be 'null'.", (Exception)null);
+            }
+
+            if (toExclusiveArr.Length != fromInclusiveArr.Length || stepsArr.Length != fromInclusiveArr.Length)
             {
                 throw new ArgumentException("The arrays " + nameof(fromInclusiveArr) + ", " + nameof(toExclusiveArr) + " and " + nameof(stepsArr) + " must be of the same length.");
             }
 
-            toExclusive = new int[toExclusiveArr.Length];
-            for (int i = 0; i < toExclusive.Length; i++)
-            {
-                toExclusive[i] = toExclusiveArr[i];
-            }
-            ToExclusive = new ReadOnlyCollection<int>(toExclusive);
+            Init(fromInclusiveArr, toExclusiveArr, stepsArr);
+        }
 
-            fromInclusive = new int[toExclusive.Length];
-            if (fromInclusiveArr == null)
-            {
-                for (int i = 0; i < fromInclusive.Length; i++)
-                {
-                    fromInclusive[i] = 0;
-                } 
-            }
-            else
-            {
-                for (int i = 0; i < fromInclusive.Length; i++)
-                {
-                    fromInclusive[i] = fromInclusiveArr[i];
-                }
-            }
-            FromInclusive = new ReadOnlyCollection<int>(fromInclusive);
+        public MultiIndex(int toExclusive, int indexLength) : this(0, toExclusive, 1, indexLength) { }
 
-            indices = new int[fromInclusive.Length];
-            for (int i = 0; i < indices.Length; i++)
-            {
-                indices[i] = fromInclusive[i];
-            }
-            indices[indices.Length - 1] = fromInclusive[fromInclusive.Length - 1] - 1;
-            Indices = new ReadOnlyCollection<int>(indices);
+        public MultiIndex(int fromInclusive, int toExclusive, int indexLength) : this(fromInclusive, toExclusive, 1, indexLength) { }
 
-            steps = new int[fromInclusive.Length];
-            if (stepsArr == null)
+        public MultiIndex(int fromInclusive, int toExclusive, int steps, int indexLength)
+        {
+            int[] fromInclusiveArr = new int[indexLength];
+            int[] toExclusiveArr = new int[indexLength];
+            int[] stepsArr = new int[indexLength];
+
+            for (int i = 0; i < indexLength; i++)
             {
-                for (int i = 0; i < steps.Length; i++)
-                {
-                    steps[i] = 1;
-                }
+                fromInclusiveArr[i] = fromInclusive;
+                toExclusiveArr[i] = toExclusive;
+                stepsArr[i] = steps;
             }
-            else
+
+            Init(fromInclusiveArr, toExclusiveArr, stepsArr);
+        }
+
+        private void Init(int[] fromInclusiveArr, int[] toExclusiveArr, int[] stepsArr)
+        {
+            _fromInclusive = new int[fromInclusiveArr.Length];
+            for (int i = 0; i < _fromInclusive.Length; i++)
             {
-                for (int i = 0; i < steps.Length; i++)
-                {
-                    steps[i] = stepsArr[i];
-                }
+                _fromInclusive[i] = fromInclusiveArr[i];
             }
-            Steps = new ReadOnlyCollection<int>(steps);
+            FromInclusive = new ReadOnlyCollection<int>(_fromInclusive);
+
+            _toExclusive = new int[toExclusiveArr.Length];
+            for (int i = 0; i < _toExclusive.Length; i++)
+            {
+                _toExclusive[i] = toExclusiveArr[i];
+            }
+            ToExclusive = new ReadOnlyCollection<int>(_toExclusive);
+
+            _steps = new int[stepsArr.Length];
+            for (int i = 0; i < _steps.Length; i++)
+            {
+                _steps[i] = stepsArr[i];
+            }
+            Steps = new ReadOnlyCollection<int>(_steps);
+
+            _indices = new int[_fromInclusive.Length];
+            for (int i = 0; i < _indices.Length; i++)
+            {
+                _indices[i] = _fromInclusive[i];
+            }
+            Indices = new ReadOnlyCollection<int>(_indices);
+
+            ResetLastIndex();
         }
 
         public int this[int index]
         {
             get
             {
-                return indices[index];
+                return _indices[index];
             }
         }
 
         public bool Increment()
         {
-            for (int i = indices.Length - 1; i >= 0; i--)
+            for (int i = _indices.Length - 1; i >= 0; i--)
             {
-                if (indices[i] < toExclusive[i] - 1)
+                if (_indices[i] < _toExclusive[i] - 1)
                 {
-                    indices[i]++;
+                    _indices[i]++;
                     return true;
                 }
                 else
                 {
-                    indices[i] = fromInclusive[i];
+                    _indices[i] = _fromInclusive[i];
                 }
             }
 
-            indices[indices.Length - 1] = fromInclusive[fromInclusive.Length - 1] - 1;
+            ResetLastIndex();
 
             return false;
         }
 
         public int ToInt()
         {
-            int sum = indices[indices.Length - 1] - fromInclusive[fromInclusive.Length - 1];
+            int sum = _indices[_indices.Length - 1] - _fromInclusive[_fromInclusive.Length - 1];
             int product = 1;
 
-            for (int i = indices.Length - 2; i >= 0; i--)
+            for (int i = _indices.Length - 2; i >= 0; i--)
             {
-                product *= (toExclusive[i + 1] - fromInclusive[i + 1]);
-                sum += (indices[i] - fromInclusive[i]) * product;
+                product *= (_toExclusive[i + 1] - _fromInclusive[i + 1]);
+                sum += (_indices[i] - _fromInclusive[i]) * product;
             }
 
             return sum;
@@ -123,11 +173,16 @@ namespace RedMath.Utils
 
         public void Reset()
         {
-            for (int i = 0; i < indices.Length; i++)
+            for (int i = 0; i < _indices.Length - 1; i++)
             {
-                indices[i] = fromInclusive[i];
+                _indices[i] = _fromInclusive[i];
             }
-            indices[indices.Length - 1] = fromInclusive[fromInclusive.Length - 1] - 1;
+            ResetLastIndex();
+        }
+
+        private void ResetLastIndex()
+        {
+            _indices[Indices.Count - 1] = _fromInclusive[_fromInclusive.Length - 1] - 1;
         }
 
         public IEnumerator<ReadOnlyCollection<int>> GetEnumerator()

@@ -3,214 +3,372 @@ using Microsoft.VisualStudio.TestTools.UnitTesting;
 using RedMath.LinearAlgebra;
 using System.Diagnostics;
 using RedMath.Structures;
+using RedMath.Utils;
 
 namespace RedMathTests
 {
     [TestClass]
     public class MatrixTests
     {
-        Matrix<Real> mat = new Matrix<Real>
-                (
-                new Real[,]
-                {
-                    { 0, 1, 2, 1 },
-                    { 3, 3, 3, 5 },
-                    { -3, 0, 3, -2 }
-                }
-                );
-
-        Matrix<Real> mat2 = new Matrix<Real>
-                (
-                new Real[,]
-                {
-                    { 0, 0 },
-                    { 0, 1 },
-                }
-                );
-
-        Matrix<Real> equationMat = new Matrix<Real>
-                (
-                new Real[,]
-                {
-                    { 1, 2, 1, 3, -5 },
-                    { 1, 3, 2, 5, -2 },
-                    { 3, 7, 5, 14, -4 }
-                }
-                );
-
-        Matrix<Complex> complexMat = new Matrix<Complex>
-                (
-                new Complex[,]
-                {
-                    { new Complex(2, -1), new Complex(3, 0), new Complex(0, 1) },
-                    { new Complex(0, 2), new Complex(1, 2), new Complex(-1, 0) },
-                    { new Complex(1, -2), new Complex(0, -1), new Complex(1, 1) }
-                }
-                );
-
-        Matrix<Complex> PMat = new Matrix<Complex>
-            (
-            new Complex[,]
+        public static Matrix<Real> TestMatrix1 = new Matrix<Real>
+        (
+            new Real[,]
             {
-                { new Complex(0, 1), new Complex(1, 0) },
-                { new Complex(1, 0), new Complex(0, 1) }
+                { 1,    2,    7,   3 },
+                { 3,   -1,    4.6, 4 },
+                { 1.2, -3.4, -10,  9 }
             }
+        );
+
+        public static Matrix<Real> TestMatrix2 = new Matrix<Real>
+        (
+            new Real[,]
+            {
+                { 1,  2,  7  },
+                { 3, -1,  4  },
+                { 5,  4, -10 }
+            }
+        );
+
+        [TestMethod]
+        public void Height()
+        {
+            Assert.AreEqual(3, TestMatrix1.Height);
+        }
+
+        [TestMethod]
+        public void Width()
+        {
+            Assert.AreEqual(4, TestMatrix1.Width);
+        }
+
+        [TestMethod]
+        public void Rows()
+        {
+            Assert.AreEqual(3, TestMatrix1.Rows);
+        }
+
+        [TestMethod]
+        public void Columns()
+        {
+            Assert.AreEqual(4, TestMatrix1.Columns);
+        }
+
+        [TestMethod]
+        public void IsRowMatrix()
+        {
+            Assert.AreEqual(false, TestMatrix1.IsRowMatrix);
+        }
+
+        [TestMethod]
+        public void IsColumnMatrix()
+        {
+            Assert.AreEqual(false, TestMatrix1.IsColumnMatrix);
+        }
+
+        [TestMethod]
+        public void IsSquareMatrix()
+        {
+            Assert.AreEqual(false, TestMatrix1.IsSquareMatrix);
+        }
+
+        [TestMethod]
+        public void IsIdentity()
+        {
+            Assert.AreEqual(false, TestMatrix1.IsIdentity);
+        }
+
+        [TestMethod]
+        public void IsLowerTriangular()
+        {
+            Assert.AreEqual(false, TestMatrix1.IsLowerTriangular);
+        }
+
+        [TestMethod]
+        public void IsUpperTriangular()
+        {
+            Assert.AreEqual(false, TestMatrix1.IsUpperTriangular);
+        }
+
+        [TestMethod]
+        public void MainDiagonal()
+        {
+            Real[] diag = TestMatrix1.MainDiagonal;
+            Real[] expected = new Real[] { 1, -1, -10 };
+
+            for (int i = 0; i < diag.Length; i++)
+            {
+                Assert.AreEqual(expected[i], diag[i]);
+            }
+        }
+
+        [TestMethod]
+        public void AntiDiagonal()
+        {
+            Real[] expected = new Real[] { 1.2, -1, 7 };
+
+            Assert.AreEqual(expected[0], TestMatrix1.AntiDiagonal[0]);
+            Assert.AreEqual(expected[1], TestMatrix1.AntiDiagonal[1]);
+            Assert.AreEqual(expected[2], TestMatrix1.AntiDiagonal[2]);
+        }
+
+        [TestMethod]
+        public void Decomposition()
+        {
+            Matrix<Real> reconstruction = TestMatrix1.Decomposition.Permutation.ToMatrix() * TestMatrix1.Decomposition.LowerMatrix * TestMatrix1.Decomposition.UpperMatrix;
+            double diffSum = 0;
+            foreach (var val in ((Real[,])(TestMatrix1 - reconstruction))) { diffSum += val; }
+            Assert.IsTrue(diffSum < 1e-12);
+            //Assert.AreEqual(TestMatrix1, reconstruction, "Average Difference: " + diffSum);
+        }
+
+        [TestMethod]
+        public void Determinant()
+        {
+            Assert.AreEqual(213, Math.Floor(TestMatrix2.Determinant));
+        }
+
+        [TestMethod]
+        public void EchelonForm()
+        {
+            Matrix<Real> expected = new Matrix<Real>
+            (
+                new Real[,]
+                {
+                    { 1, 2, 7       },
+                    { 0, 1, 82D/35D },
+                    { 0, 0, 1       }
+                }
             );
 
-        [TestMethod]
-        public void DecompositionTest()
-        {
-            Debug.WriteLine(mat);
-            Debug.WriteLine("--->");
-            Debug.WriteLine(mat.EchelonForm);
-            Debug.WriteLine("--->");
-            Debug.WriteLine(mat.ReducedEchelonForm);
-            Debug.WriteLine("");
-
-            Debug.WriteLine("L:");
-            Debug.WriteLine("--->");
-            Debug.WriteLine(mat.Decomposition.LowerMatrix);
-            Debug.WriteLine("");
-            Debug.WriteLine("U:");
-            Debug.WriteLine("--->");
-            Debug.WriteLine(mat.Decomposition.UpperMatrix);
-            Debug.WriteLine("");
-            Debug.WriteLine("P:");
-            Debug.WriteLine("--->");
-            Debug.WriteLine(mat.Decomposition.Permutation.ToMatrix());
-            Debug.WriteLine("");
-            Debug.WriteLine("P * L * U:");
-            Debug.WriteLine("--->");
-            Debug.WriteLine(mat.Decomposition.Permutation.ToMatrix() * mat.Decomposition.LowerMatrix * mat.Decomposition.UpperMatrix);
-            Debug.WriteLine("");
+            double diffSum = 0;
+            foreach (var val in ((Real[,])(TestMatrix2.EchelonForm - expected))) { diffSum += val; }
+            Assert.IsTrue(diffSum < 1);
+            //Assert.AreEqual(expected, TestMatrix2.EchelonForm);
         }
 
         [TestMethod]
-        public void EquivalenceTest()
+        public void ReducedEchelonForm()
         {
-            Matrix<Real> m1 = new Matrix<Real>(new Real[,] { { 1, 2 }, { 3, 4 } });
-            Matrix<Real> m2 = new Matrix<Real>(new Real[,] { { 1, 2 }, { 3, 4 } });
+            Matrix<Real> expected = new Matrix<Real>
+            (
+                new Real[,]
+                {
+                    { 1, 0, 0 },
+                    { 0, 1, 0 },
+                    { 0, 0, 1 }
+                }
+            );
 
-            Debug.WriteLine("M1:");
-            Debug.WriteLine(m1);
-            Debug.WriteLine("");
-
-            Debug.WriteLine("M2:");
-            Debug.WriteLine(m2);
-            Debug.WriteLine("");
-
-            Debug.WriteLine("M1 == M2");
-            Debug.WriteLine(m1 == m2);
-
-            Debug.WriteLine("M1.Equals(M2)");
-            Debug.WriteLine(m1.Equals(m2));
+            Assert.AreEqual(expected, TestMatrix2.ReducedEchelonForm);
         }
 
         [TestMethod]
-        public void DeterminantTest()
+        public void CofactorMatrix()
         {
-            Debug.WriteLine("Matrix:");
-            Debug.WriteLine(mat);
-            Debug.WriteLine("");
-            Debug.WriteLine("Detrminant:");
-            Debug.WriteLine("--->");
-            Debug.WriteLine(mat.Determinant);
-            Debug.WriteLine("");
+            Matrix<Real> expected = new Matrix<Real>
+            (
+                new Real[,]
+                {
+                    { -6,   50,  17 },
+                    {  48, -45,  6  },
+                    {  15,  17, -7  }
+                }
+            );
+
+            var cofactorMat = TestMatrix2.CofactorMatrix;
+
+            for (int i = 0; i < cofactorMat.Rows; i++)
+            {
+                for (int j = 0; j < cofactorMat.Columns; j++)
+                {
+                    cofactorMat[i, j] = Math.Round(cofactorMat[i, j]);
+                }
+            }
+
+            Assert.AreEqual(expected, cofactorMat);
         }
 
         [TestMethod]
-        public void ComplexDeterminantTest()
+        public void InverseMatrix()
         {
-            Debug.WriteLine("Matrix:");
-            Debug.WriteLine(complexMat);
-            Debug.WriteLine("");
-            Debug.WriteLine("Detrminant:");
-            Debug.WriteLine("--->");
-            Debug.WriteLine(complexMat.Determinant);
-            Debug.WriteLine("");
+            Matrix<Real> expected = new Matrix<Real>
+            (
+                new Real[,]
+                {
+                    { 1, 0, 0 },
+                    { 0, 1, 0 },
+                    { 0, 0, 1 }
+                }
+            );
+
+            double diffSum = 0;
+            foreach (var val in ((Real[,])(TestMatrix2.Inverse * TestMatrix2 - expected))) { diffSum += val; }
+            Assert.IsTrue(diffSum < 1e-12);
+            //Assert.AreEqual(expected, TestMatrix2.Inverse * TestMatrix2);
         }
 
         [TestMethod]
-        public void InverseTest()
+        public void Rank()
         {
-            Debug.WriteLine("Matrix:");
-            Debug.WriteLine(mat);
-            Debug.WriteLine("");
-            Debug.WriteLine("Inverse:");
-            Debug.WriteLine("--->");
-            Debug.WriteLine(mat.Inverse);
-            Debug.WriteLine("");
-            Debug.WriteLine("Matrix * Inverse:");
-            Debug.WriteLine("--->");
-            Debug.WriteLine(mat * mat.Inverse);
-            Debug.WriteLine("");
+            Assert.AreEqual(3, TestMatrix1.Rank);
         }
 
         [TestMethod]
-        public void ComplexInverseTest()
+        public void IsFullRank()
         {
-            Debug.WriteLine("Matrix:");
-            Debug.WriteLine(PMat);
-            Debug.WriteLine("");
-            Debug.WriteLine("Inverse:");
-            Debug.WriteLine("--->");
-            Debug.WriteLine(PMat.Inverse);
-            Debug.WriteLine("");
-            Debug.WriteLine("Matrix * Inverse:");
-            Debug.WriteLine("--->");
-            Debug.WriteLine(PMat * PMat.Inverse);
-            Debug.WriteLine("");
+            Assert.AreEqual(false, TestMatrix1.IsFullRank);
         }
 
         [TestMethod]
-        public void ReductionTest()
+        public void Transposition()
         {
-            Debug.WriteLine("Matrix:");
-            Debug.WriteLine(mat);
-            Debug.WriteLine("");
-            Debug.WriteLine("Echelon Form:");
-            Debug.WriteLine("--->");
-            Debug.WriteLine(mat.EchelonForm);
-            Debug.WriteLine("");
-            Debug.WriteLine("Reduced Echelon Form:");
-            Debug.WriteLine("--->");
-            Debug.WriteLine(mat.ReducedEchelonForm);
-            Debug.WriteLine("");
+            Assert.AreEqual(TestMatrix1, TestMatrix1.Transposition.Transposition);
         }
 
         [TestMethod]
-        public void EquationTest()
+        public void SubMatrix()
         {
-            Debug.WriteLine("Matrix:");
-            Debug.WriteLine(equationMat);
-            Debug.WriteLine("");
-            Debug.WriteLine("Echelon Form:");
-            Debug.WriteLine("--->");
-            Debug.WriteLine(equationMat.EchelonForm);
-            Debug.WriteLine("");
-            Debug.WriteLine("Reduced Echelon Form:");
-            Debug.WriteLine("--->");
-            Debug.WriteLine(equationMat.ReducedEchelonForm);
-            Debug.WriteLine("");
+            Matrix<Real> expected = new Matrix<Real>
+            (
+                new Real[,]
+                {
+                    { 1, 7,   3 },
+                    { 3, 4.6, 4 }
+                }
+            );
+
+            Assert.AreEqual(expected, TestMatrix1.SubMatrix(2, 1));
         }
 
         [TestMethod]
-        public void TrasformationTest()
+        public void Resize()
         {
-            Debug.WriteLine("Matrix:");
-            Debug.WriteLine(LinearTransformations.CreateLookAtMatrix(new Vector<Real>(1, 1, 1, 1), new Vector<Real>(2, 3, 2, 6), new Vector<Real>(0, 1, 0, 3), new Vector<Real>(1, 0, 3, 2)));
-            Debug.WriteLine("");
+            Matrix<Real> expected = new Matrix<Real>
+            (
+                new Real[,]
+                {
+                    { 1,  2 },
+                    { 3, -1 },
+                }
+            );
+
+            Matrix<Real> testMatrix1 = new Matrix<Real>(TestMatrix1);
+            testMatrix1.Resize(2, 2);
+
+            Assert.AreEqual(expected, testMatrix1);
         }
 
         [TestMethod]
-        public void VectorHomTest()
+        public void Transpose()
         {
-            Vector<Real> vec = new Vector<Real>(1, 2, 3);
+            Matrix<Real> testMatrix1 = new Matrix<Real>(TestMatrix1);
+            testMatrix1.Transpose();
+            testMatrix1.Transpose();
 
-            Debug.WriteLine("Vector:");
-            Debug.WriteLine(vec);
-            Debug.WriteLine("Vector Hom:");
-            Debug.WriteLine(vec.HomogeneousCoordinates);
+            Assert.AreEqual(TestMatrix1, testMatrix1);
+        }
+
+        [TestMethod]
+        public void GetRowVector()
+        {
+            Assert.AreEqual(new Vector<Real>(3, -1, 4.6, 4), TestMatrix1.GetRowVector(1));
+        }
+
+        [TestMethod]
+        public void GetColumnVector()
+        {
+            Assert.AreEqual(new Vector<Real>(3, 4, 9), TestMatrix1.GetColumnVector(3));
+        }
+
+        [TestMethod]
+        public void AppendRowVector()
+        {
+            Matrix<Real> testMatrix1 = new Matrix<Real>(TestMatrix1);
+            testMatrix1.AppendRowVector(new Vector<Real>(2, 3));
+
+            Matrix<Real> expected = new Matrix<Real>
+            (
+                new Real[,]
+                {
+                    { 1,    2,    7,   3 },
+                    { 3,   -1,    4.6, 4 },
+                    { 1.2, -3.4, -10,  9 },
+                    { 2,    3,    0,   0 }
+                }
+            );
+
+            Assert.AreEqual(expected, testMatrix1);
+        }
+
+        [TestMethod]
+        public void InsertRowVector()
+        {
+            Matrix<Real> testMatrix1 = new Matrix<Real>(TestMatrix1);
+            testMatrix1.InsertRowVector(new Vector<Real>(2, 3), 1);
+
+            Matrix<Real> expected = new Matrix<Real>
+            (
+                new Real[,]
+                {
+                    { 1,    2,    7,   3 },
+                    { 2,    3,    0,   0 },
+                    { 3,   -1,    4.6, 4 },
+                    { 1.2, -3.4, -10,  9 }
+                }
+            );
+
+            Assert.AreEqual(expected, testMatrix1);
+        }
+
+        [TestMethod]
+        public void AppendColumnVector()
+        {
+            Matrix<Real> testMatrix1 = new Matrix<Real>(TestMatrix1);
+            testMatrix1.AppendColumnVector(new Vector<Real>(2, 3));
+
+            Matrix<Real> expected = new Matrix<Real>
+            (
+                new Real[,]
+                {
+                    { 1,    2,    7,   3, 2 },
+                    { 3,   -1,    4.6, 4, 3 },
+                    { 1.2, -3.4, -10,  9, 0 },
+                }
+            );
+
+            Assert.AreEqual(expected, testMatrix1);
+        }
+
+        [TestMethod]
+        public void InsertColumnVector()
+        {
+            Matrix<Real> testMatrix1 = new Matrix<Real>(TestMatrix1);
+            testMatrix1.InsertColumnVector(new Vector<Real>(2, 3), 1);
+
+            Matrix<Real> expected = new Matrix<Real>
+            (
+                new Real[,]
+                {
+                    { 1,   2,  2,    7,   3 },
+                    { 3,   3, -1,    4.6, 4 },
+                    { 1.2, 0, -3.4, -10,  9 }
+                }
+            );
+
+            Assert.AreEqual(expected, testMatrix1);
+        }
+
+        [TestMethod]
+        public void Minor()
+        {
+            Assert.AreEqual(-7, TestMatrix2.Minor(2, 2));
+        }
+
+        [TestMethod]
+        public void Cofactor()
+        {
+            Assert.AreEqual(-7, TestMatrix2.Cofactor(2, 2));
         }
     }
 }

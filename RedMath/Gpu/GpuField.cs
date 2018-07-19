@@ -1,7 +1,7 @@
 ﻿using RedMath.Structures;
 using System;
 
-namespace RedMath.HighPerformance.Gpu
+namespace RedMath.Gpu
 {
     public interface IClassStructConverter<ClassType, StructType> where ClassType : class where StructType : struct
     {

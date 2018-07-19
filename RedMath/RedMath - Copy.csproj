@@ -28,7 +28,7 @@
     <DebugType>pdbonly</DebugType>
     <Optimize>true</Optimize>
     <OutputPath>bin\Release\</OutputPath>
-    <DefineConstants>TRACE;GPU_SUPPORT</DefineConstants>
+    <DefineConstants>TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
@@ -36,7 +36,7 @@
     <!-- C# source files -->
     <Compile Include="Algebra.cs" />
     <Compile Include="FFT.cs" />
-    <Compile Include="Gpu\GpuField.cs" Condition="$(DefineConstants.Contains(GPU_SUPPORT))" />
+    <Compile Include="Gpu\GpuCompatibility.cs" />
     <Compile Include="HighPerformance\Cpu\CpuMatrixMultiplication.cs" />
     <Compile Include="HighPerformance\Gpu\GpuMatrixMultiplication.cs" Condition="$(DefineConstants.Contains(GPU_SUPPORT))" />
     <Compile Include="LinearAlgebra\VectorExtensions.cs" />
@@ -50,9 +50,8 @@
     <Compile Include="Structures\Complex.cs" />
     <Compile Include="Structures\Expression\ExpressionNode.cs" />
     <Compile Include="Structures\Field.cs" />
-    <Compile Include="Gpu\GpuComplex.cs" Condition="$(DefineConstants.Contains(GPU_SUPPORT))" />
-    <Compile Include="Gpu\GpuRational.cs" Condition="$(DefineConstants.Contains(GPU_SUPPORT))" />
-    <Compile Include="Gpu\GpuReal.cs" Condition="$(DefineConstants.Contains(GPU_SUPPORT))" />
+    <Compile Include="Structures\GpuRational.cs" />
+    <Compile Include="Structures\GpuReal.cs" />
     <Compile Include="Structures\Rational.cs" />
     <Compile Include="Structures\Real.cs" />
     <Compile Include="Utils\MultiIndex.cs" />

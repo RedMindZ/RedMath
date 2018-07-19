@@ -2,13 +2,14 @@
 
 using Alea;
 using Alea.CSharp;
+using Alea.cuBLAS;
 
 using RedMath.LinearAlgebra;
 using RedMath.Structures;
 using RedMath.Utils;
-using RedMath.HighPerformance.Gpu;
+using RedMath.Gpu;
 
-namespace RedMath.HighPerformance.Mixed
+namespace RedMath.HighPerformance
 {
     public static partial class MatrixMultiplication
     {
@@ -25,9 +26,9 @@ namespace RedMath.HighPerformance.Mixed
             GpuStructType[,] leftArr = new GpuStructType[left.Rows, left.Columns];
             GpuStructType[,] rightArr = new GpuStructType[right.Rows, right.Columns];
 
-            resultArr.Assign(gpuStructManager.GetStructDefaultValue());
-            leftArr.Assign(ind => gpuStructManager.ToStruct(left[ind[0], ind[1]]));
-            rightArr.Assign(ind => gpuStructManager.ToStruct(right[ind[0], ind[1]]));
+            resultArr.AssignAll(gpuStructManager.GetStructDefaultValue());
+            leftArr.AssignAll(ind => gpuStructManager.ToStruct(left[ind[0], ind[1]]));
+            rightArr.AssignAll(ind => gpuStructManager.ToStruct(right[ind[0], ind[1]]));
 
 
             Alea.Gpu gpu = Alea.Gpu.Default;
@@ -40,7 +41,7 @@ namespace RedMath.HighPerformance.Mixed
             gpu.Launch(multiplicationKernel, lp, leftArr, rightArr, resultArr, gpuStructManager.GetStructAddition(), gpuStructManager.GetStructMultiplication());
 
             FieldType[,] fieldResultArr = new FieldType[resultArr.GetLength(0), resultArr.GetLength(1)];
-            fieldResultArr.Assign(ind => gpuStructManager.ToClass(resultArr[ind[0], ind[1]]));
+            fieldResultArr.AssignAll(ind => gpuStructManager.ToClass(resultArr[ind[0], ind[1]]));
 
             return new Matrix<FieldType>(fieldResultArr);
         }

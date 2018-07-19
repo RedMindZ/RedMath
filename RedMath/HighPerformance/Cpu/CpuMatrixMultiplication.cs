@@ -4,11 +4,11 @@ using System.Threading.Tasks;
 using RedMath.LinearAlgebra;
 using RedMath.Structures;
 
-namespace RedMath.HighPerformance.Mixed
+namespace RedMath.HighPerformance
 {
     public static partial class MatrixMultiplication
     {
-        public static Matrix<T> ParallelMultiply<T>(Matrix<T> left, Matrix<T> right) where T : Field<T>, new()
+        public static Matrix<T> CpuParallelMultiply<T>(Matrix<T> left, Matrix<T> right) where T : Field<T>, new()
         {
             if (left.Width != right.Height)
             {
@@ -33,7 +33,5 @@ namespace RedMath.HighPerformance.Mixed
 
             return new Matrix<T>(temp);
         }
-
-        
     }
 }

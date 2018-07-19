@@ -11,7 +11,7 @@ using RedMath.Structures;
 using RedMath.LinearAlgebra;
 using RedMath.LinearAlgebra.MatrixOperations;
 using RedMath.Structures.Expression;
-using RedMath.HighPerformance.Mixed;
+using RedMath.HighPerformance;
 using System.Threading;
 
 namespace ExecutionTest
@@ -38,7 +38,7 @@ namespace ExecutionTest
             Stopwatch sw = new Stopwatch();
 
             Rational[,] matData = new Rational[3, 3];
-            matData.Assign(ind => new Rational(ind[0] * matData.GetLength(0) + ind[1]));
+            matData.AssignAll(ind => new Rational(ind[0] * matData.GetLength(0) + ind[1]));
             Matrix<Rational> mat1 = new Matrix<Rational>(matData);
             Matrix<Rational> mat2 = new Matrix<Rational>(mat1.Transposition);
 
@@ -70,7 +70,7 @@ namespace ExecutionTest
 
             for (int i = 0; i < testCount; i++)
             {
-                res = MatrixMultiplication.ParallelMultiply(mat1, mat2);
+                res = MatrixMultiplication.CpuParallelMultiply(mat1, mat2);
             }
 
             sw.Stop();

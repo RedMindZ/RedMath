@@ -31,24 +31,24 @@ namespace RedMath.Structures
         }
 
 
-        public static T Add(T lhs, T rhs)
+        public static T Add(T left, T right)
         {
-            return lhs.Add(rhs);
+            return left.Add(right);
         }
 
-        public static T Multiply(T lhs, T rhs)
+        public static T Multiply(T left, T right)
         {
-            return lhs.Multiply(rhs);
+            return left.Multiply(right);
         }
 
-        public static T Subtract(T lhs, T rhs)
+        public static T Subtract(T left, T right)
         {
-            return lhs.Subtract(rhs);
+            return left.Subtract(right);
         }
 
-        public static T Divide(T lhs, T rhs)
+        public static T Divide(T left, T right)
         {
-            return lhs.Divide(rhs);
+            return left.Divide(right);
         }
 
 

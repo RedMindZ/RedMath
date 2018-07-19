@@ -8,22 +8,22 @@ using RedMath.Utils;
 
 namespace RedMath.LinearAlgebra
 {
-    public class Matrix<T> where T : Field<T>, new()
+    public sealed class Matrix<T> where T : Field<T>, new()
     {
         #region Class Fields
-        protected T[,] definingArray;
-        protected Cache<string> computationCache = new Cache<string>();
+        private T[,] _definingArray;
+        private Cache<string> _computationCache = new Cache<string>();
 
-        private static T fieldZero = new T().Zero;
-        private static T fieldOne = new T().One;
+        private static T _fieldZero = new T().Zero;
+        private static T _fieldOne = new T().One;
         #endregion
 
         #region Size Properties
-        public int Height => definingArray.GetLength(0);
-        public int Width => definingArray.GetLength(1);
+        public int Height => _definingArray.GetLength(0);
+        public int Width => _definingArray.GetLength(1);
 
-        public int Rows => definingArray.GetLength(0);
-        public int Columns => definingArray.GetLength(1);
+        public int Rows => _definingArray.GetLength(0);
+        public int Columns => _definingArray.GetLength(1);
         #endregion
 
         #region Matrix Properties
@@ -32,10 +32,10 @@ namespace RedMath.LinearAlgebra
 
         public bool IsSquareMatrix => Rows == Columns;
 
-        public bool IsIdentity => computationCache.RetrieveValue<bool, Matrix<T>>("identity", this);
+        public bool IsIdentity => _computationCache.RetrieveValue<bool, Matrix<T>>("identity", this);
 
-        public bool IsLowerTriangular => computationCache.RetrieveValue<bool, Matrix<T>>("lowerTriangular", this);
-        public bool IsUpperTriangular => computationCache.RetrieveValue<bool, Matrix<T>>("upperTriangular", this);
+        public bool IsLowerTriangular => _computationCache.RetrieveValue<bool, Matrix<T>>("lowerTriangular", this);
+        public bool IsUpperTriangular => _computationCache.RetrieveValue<bool, Matrix<T>>("upperTriangular", this);
         #endregion
 
         #region Diagonals
@@ -45,10 +45,7 @@ namespace RedMath.LinearAlgebra
             {
                 T[] seq = new T[Math.Min(Height, Width)];
 
-                for (int i = 0; i < seq.Length; i++)
-                {
-                    seq[i] = definingArray[i, i].Clone();
-                }
+                seq.AssignAll(ind => _definingArray[ind[0], ind[0]].Clone());
 
                 return seq;
             }
@@ -60,31 +57,28 @@ namespace RedMath.LinearAlgebra
             {
                 T[] seq = new T[Math.Min(Height, Width)];
 
-                for (int i = 0; i < seq.Length; i++)
-                {
-                    seq[i] = definingArray[seq.Length - i - 1, i].Clone();
-                }
+                seq.AssignAll(ind => _definingArray[seq.Length - ind[0] - 1, ind[0]].Clone());
 
                 return seq;
             }
         }
         #endregion
 
-        public LUPDecomposition<T> Decomposition => new LUPDecomposition<T>(computationCache.RetrieveValue<LUPDecomposition<T>, Matrix<T>>("decomposition", this));
+        public LUPDecomposition<T> Decomposition => new LUPDecomposition<T>(_computationCache.RetrieveValue<LUPDecomposition<T>, Matrix<T>>("decomposition", this));
 
-        public T Determinant => computationCache.RetrieveValue<T, Matrix<T>>("determinant", this);
+        public T Determinant => _computationCache.RetrieveValue<T, Matrix<T>>("determinant", this);
 
-        public List<IMatrixOperation<T>> EchelonFormReductionOperations => new List<IMatrixOperation<T>>(computationCache.RetrieveValue<List<IMatrixOperation<T>>, Matrix<T>>("echelonFormOperations", this));
-        public List<IMatrixOperation<T>> ReducedEchelonFormReductionOperations => new List<IMatrixOperation<T>>(computationCache.RetrieveValue<List<IMatrixOperation<T>>, Matrix<T>>("reducedEchelonFormOperations", this));
+        public List<IMatrixOperation<T>> EchelonFormReductionOperations => new List<IMatrixOperation<T>>(_computationCache.RetrieveValue<List<IMatrixOperation<T>>, Matrix<T>>("echelonFormOperations", this));
+        public List<IMatrixOperation<T>> ReducedEchelonFormReductionOperations => new List<IMatrixOperation<T>>(_computationCache.RetrieveValue<List<IMatrixOperation<T>>, Matrix<T>>("reducedEchelonFormOperations", this));
 
-        public Matrix<T> EchelonForm => new Matrix<T>(computationCache.RetrieveValue<Matrix<T>, Matrix<T>>("echelonForm", this));
-        public Matrix<T> ReducedEchelonForm => new Matrix<T>(computationCache.RetrieveValue<Matrix<T>, Matrix<T>>("reducedEchelonForm", this));
+        public Matrix<T> EchelonForm => new Matrix<T>(_computationCache.RetrieveValue<Matrix<T>, Matrix<T>>("echelonForm", this));
+        public Matrix<T> ReducedEchelonForm => new Matrix<T>(_computationCache.RetrieveValue<Matrix<T>, Matrix<T>>("reducedEchelonForm", this));
 
-        public Matrix<T> CofactorMatrix => new Matrix<T>(computationCache.RetrieveValue<Matrix<T>, Matrix<T>>("cofactorMatrix", this));
+        public Matrix<T> CofactorMatrix => new Matrix<T>(_computationCache.RetrieveValue<Matrix<T>, Matrix<T>>("cofactorMatrix", this));
 
-        public Matrix<T> Inverse => computationCache.RetrieveValue<Matrix<T>, Matrix<T>>("inverse", this);
+        public Matrix<T> Inverse => _computationCache.RetrieveValue<Matrix<T>, Matrix<T>>("inverse", this);
 
-        public int Rank => computationCache.RetrieveValue<int, Matrix<T>>("rank", this);
+        public int Rank => _computationCache.RetrieveValue<int, Matrix<T>>("rank", this);
 
         public bool IsFullRank => IsSquareMatrix && Rank == Rows;
 
@@ -103,14 +97,14 @@ namespace RedMath.LinearAlgebra
         {
             get
             {
-                return definingArray[row, col].Clone();
+                return _definingArray[row, col].Clone();
             }
 
             set
             {
-                definingArray[row, col] = value.Clone();
+                _definingArray[row, col] = value.Clone();
 
-                computationCache.SetAllUpdateStates(true);
+                _computationCache.SetAllUpdateStates(true);
             }
         }
 
@@ -119,38 +113,38 @@ namespace RedMath.LinearAlgebra
 
         public Matrix(int rows, int cols)
         {
-            definingArray = new T[rows, cols];
+            _definingArray = new T[rows, cols];
 
-            definingArray.Assign(ind => fieldZero.Clone());
+            _definingArray.AssignAll(ind => _fieldZero.Clone());
 
-            initCache();
+            InitCache();
         }
 
-        public Matrix(T[,] data)
+        public Matrix(T[,] entries)
         {
-            definingArray = new T[data.GetLength(0), data.GetLength(1)];
+            _definingArray = new T[entries.GetLength(0), entries.GetLength(1)];
 
-            definingArray.Assign(ind => data[ind[0], ind[1]].Clone());
+            _definingArray.AssignAll(ind => entries[ind[0], ind[1]].Clone());
 
-            initCache();
+            InitCache();
         }
 
-        public Matrix(Matrix<T> mat) : this(mat.definingArray) { }
+        public Matrix(Matrix<T> mat) : this(mat._definingArray) { }
 
-        private void initCache()
+        private void InitCache()
         {
-            computationCache.AddCacheEntry("determinant", null, true, (Matrix<T> mat) => mat.computeDeterminant());
-            computationCache.AddCacheEntry("echelonForm", null, true, (Matrix<T> mat) => mat.computeEchelonForm().Item1);
-            computationCache.AddCacheEntry("reducedEchelonForm", null, true, (Matrix<T> mat) => mat.computeReducedEchelonForm().Item1);
-            computationCache.AddCacheEntry("echelonFormOperations", null, true, (Matrix<T> mat) => mat.computeEchelonForm().Item2);
-            computationCache.AddCacheEntry("reducedEchelonFormOperations", null, true, (Matrix<T> mat) => mat.computeReducedEchelonForm().Item2);
-            computationCache.AddCacheEntry("decomposition", null, true, (Matrix<T> mat) => mat.computeDecomposition());
-            computationCache.AddCacheEntry("identity", false, true, (Matrix<T> mat) => mat.testForIdentity());
-            computationCache.AddCacheEntry("cofactorMatrix", null, true, (Matrix<T> mat) => mat.computeCofactorMatrix());
-            computationCache.AddCacheEntry("inverse", null, true, (Matrix<T> mat) => mat.computeInverse());
-            computationCache.AddCacheEntry("rank", 0, true, (Matrix<T> mat) => mat.computeRank());
-            computationCache.AddCacheEntry("lowerTriangular", false, true, (Matrix<T> mat) => mat.testForLowerTriangular());
-            computationCache.AddCacheEntry("upperTriangular", false, true, (Matrix<T> mat) => mat.testForUpperTriangular());
+            _computationCache.AddCacheEntry("determinant", null, true, (Matrix<T> mat) => mat.ComputeDeterminant());
+            _computationCache.AddCacheEntry("echelonForm", null, true, (Matrix<T> mat) => mat.ComputeEchelonForm().Item1);
+            _computationCache.AddCacheEntry("reducedEchelonForm", null, true, (Matrix<T> mat) => mat.ComputeReducedEchelonForm().Item1);
+            _computationCache.AddCacheEntry("echelonFormOperations", null, true, (Matrix<T> mat) => mat.ComputeEchelonForm().Item2);
+            _computationCache.AddCacheEntry("reducedEchelonFormOperations", null, true, (Matrix<T> mat) => mat.ComputeReducedEchelonForm().Item2);
+            _computationCache.AddCacheEntry("decomposition", null, true, (Matrix<T> mat) => mat.ComputeDecomposition());
+            _computationCache.AddCacheEntry("identity", false, true, (Matrix<T> mat) => mat.TestForIdentity());
+            _computationCache.AddCacheEntry("cofactorMatrix", null, true, (Matrix<T> mat) => mat.ComputeCofactorMatrix());
+            _computationCache.AddCacheEntry("inverse", null, true, (Matrix<T> mat) => mat.ComputeInverse());
+            _computationCache.AddCacheEntry("rank", 0, true, (Matrix<T> mat) => mat.ComputeRank());
+            _computationCache.AddCacheEntry("lowerTriangular", false, true, (Matrix<T> mat) => mat.TestForLowerTriangular());
+            _computationCache.AddCacheEntry("upperTriangular", false, true, (Matrix<T> mat) => mat.TestForUpperTriangular());
         }
 
         #endregion
@@ -160,7 +154,7 @@ namespace RedMath.LinearAlgebra
             int rowIndex = 0;
             int colIndex = 0;
 
-            T[,] subMatrix = new T[Height - (row < 0 ? 0 : 1), Width - (col < 0 ? 0 : 1)];
+            T[,] subMatrix = new T[Rows - (row < 0 ? 0 : 1), Columns - (col < 0 ? 0 : 1)];
 
             for (int i = 0; i < Height; i++)
             {
@@ -172,7 +166,7 @@ namespace RedMath.LinearAlgebra
                     {
                         if (j != col)
                         {
-                            subMatrix[rowIndex, colIndex] = definingArray[i, j];
+                            subMatrix[rowIndex, colIndex] = _definingArray[i, j];
 
                             colIndex++;
                         }
@@ -192,7 +186,7 @@ namespace RedMath.LinearAlgebra
                 return;
             }
 
-            T[,] newData = new T[rows, cols];
+            T[,] buffer = new T[rows, cols];
 
             for (int i = 0; i < rows; i++)
             {
@@ -200,36 +194,36 @@ namespace RedMath.LinearAlgebra
                 {
                     if (i < Rows && j < Columns)
                     {
-                        newData[i, j] = definingArray[i, j];
+                        buffer[i, j] = _definingArray[i, j];
                     }
                     else
                     {
-                        newData[i, j] = fieldZero.Clone();
+                        buffer[i, j] = _fieldZero.Clone();
                     }
                 }
             }
 
-            definingArray = newData;
+            _definingArray = buffer;
 
-            computationCache.SetAllUpdateStates(true);
+            _computationCache.SetAllUpdateStates(true);
         }
 
         public void Transpose()
         {
-            T[,] temp = new T[Columns, Rows];
+            T[,] buffer = new T[Columns, Rows];
 
-            temp.Assign(ind => definingArray[ind[1], ind[0]]);
+            buffer.AssignAll(ind => _definingArray[ind[1], ind[0]]);
 
-            definingArray = temp;
+            _definingArray = buffer;
 
-            computationCache.SetAllUpdateStates(true);
+            _computationCache.SetAllUpdateStates(true);
         }
 
         public Vector<T> GetRowVector(int index)
         {
             T[] res = new T[Width];
 
-            res.Assign(ind => definingArray[index, ind[0]].Clone());
+            res.AssignAll(ind => this[index, ind[0]]);
 
             return new Vector<T>(res);
         }
@@ -238,50 +232,34 @@ namespace RedMath.LinearAlgebra
         {
             T[] res = new T[Height];
 
-            res.Assign(ind => definingArray[ind[0], index].Clone());
+            res.AssignAll(ind => this[ind[0], index]);
 
             return new Vector<T>(res);
         }
 
         public void AppendRowVector(Vector<T> row)
         {
-            Matrix<T> temp = new Matrix<T>(Rows + 1, Columns);
+            Matrix<T> buffer = new Matrix<T>(Rows + 1, Columns);
 
-            for (int i = 0; i < Height; i++)
+            buffer._definingArray.Assign(ind => _definingArray[ind[0], ind[1]], new int[] { Rows, Columns });
+
+            if (row.Dimension > buffer.Width)
             {
-                for (int j = 0; j < Width; j++)
-                {
-                    temp[i, j] = definingArray[i, j];
-                }
+                buffer.Resize(buffer.Rows, row.Dimension);
             }
 
-            if (row.Dimension > temp.Width)
-            {
-                temp.Resize(temp.Rows, row.Dimension);
-            }
+            buffer._definingArray.Assign(ind => row[ind[1]].Clone(), new int[] { buffer.Rows - 1, 0 }, new int[] { buffer.Rows - 1, row.Dimension});
 
-            for (int i = 0; i < temp.Columns; i++)
-            {
-                if (i < row.Dimension)
-                {
-                    temp[temp.Rows - 1, i] = row[i].Clone();
-                }
-                else
-                {
-                    temp[temp.Rows - 1, i] = fieldZero.Clone();
-                }
-            }
+            _definingArray = buffer._definingArray;
 
-            definingArray = temp.definingArray;
-
-            computationCache.SetAllUpdateStates(true);
+            _computationCache.SetAllUpdateStates(true);
         }
 
         public void InsertRowVector(Vector<T> row, int index)
         {
-            Matrix<T> temp = new Matrix<T>(Rows + 1, Columns);
+            Matrix<T> buffer = new Matrix<T>(Rows + 1, Columns);
 
-            for (int i = 0, rowIndex = 0; i < temp.Rows; i++)
+            for (int i = 0, rowIndex = 0; i < buffer.Rows; i++)
             {
                 if (i == index)
                 {
@@ -290,73 +268,47 @@ namespace RedMath.LinearAlgebra
 
                 for (int j = 0; j < Columns; j++)
                 {
-                    temp[i, j] = definingArray[rowIndex, j];
+                    buffer._definingArray[i, j] = _definingArray[rowIndex, j];
                 }
 
                 rowIndex++;
             }
 
-            if (row.Dimension > temp.Width)
+            if (row.Dimension > buffer.Width)
             {
-                temp.Resize(temp.Rows, row.Dimension);
+                buffer.Resize(buffer.Rows, row.Dimension);
             }
 
-            for (int i = 0; i < temp.Columns; i++)
-            {
-                if (i < row.Dimension)
-                {
-                    temp[index, i] = row[i].Clone();
-                }
-                else
-                {
-                    temp[index, i] = fieldZero.Clone();
-                }
-            }
+            buffer._definingArray.Assign(ind => row[ind[1]].Clone(), new int[] { index, 0 }, new int[] { index + 1, row.Dimension });
 
-            definingArray = temp.definingArray;
+            _definingArray = buffer._definingArray;
 
-            computationCache.SetAllUpdateStates(true);
+            _computationCache.SetAllUpdateStates(true);
         }
 
         public void AppendColumnVector(Vector<T> col)
         {
-            Matrix<T> temp = new Matrix<T>(Rows, Columns + 1);
+            Matrix<T> buffer = new Matrix<T>(Rows, Columns + 1);
 
-            for (int i = 0; i < Rows; i++)
+            buffer._definingArray.Assign(ind => _definingArray[ind[0], ind[1]], new int[] { Rows, Columns });
+
+            if (col.Dimension > buffer.Height)
             {
-                for (int j = 0; j < Columns; j++)
-                {
-                    temp[i, j] = definingArray[i, j];
-                }
+                buffer.Resize(col.Dimension, buffer.Columns);
             }
 
-            if (col.Dimension > temp.Height)
-            {
-                temp.Resize(col.Dimension, temp.Columns);
-            }
+            buffer._definingArray.Assign(ind => col[ind[0]].Clone(), new int[] { 0, buffer.Columns - 1 }, new int[] { col.Dimension, buffer.Columns });
 
-            for (int i = 0; i < temp.Rows; i++)
-            {
-                if (i < col.Dimension)
-                {
-                    temp[i, temp.Columns - 1] = col[i].Clone();
-                }
-                else
-                {
-                    temp[i, temp.Columns - 1] = fieldZero.Clone();
-                }
-            }
+            _definingArray = buffer._definingArray;
 
-            definingArray = temp.definingArray;
-
-            computationCache.SetAllUpdateStates(true);
+            _computationCache.SetAllUpdateStates(true);
         }
 
         public void InsertColumnVector(Vector<T> col, int index)
         {
-            Matrix<T> temp = new Matrix<T>(Rows, Columns + 1);
-            
-            for (int i = 0, colIndex = 0; i < temp.Columns; i++)
+            Matrix<T> buffer = new Matrix<T>(Rows, Columns + 1);
+
+            for (int i = 0, colIndex = 0; i < buffer.Columns; i++)
             {
                 if (i == index)
                 {
@@ -365,32 +317,22 @@ namespace RedMath.LinearAlgebra
 
                 for (int j = 0; j < Rows; j++)
                 {
-                    temp[j, i] = definingArray[j, colIndex];
+                    buffer._definingArray[j, i] = _definingArray[j, colIndex];
                 }
 
                 colIndex++;
             }
 
-            if (col.Dimension > temp.Height)
+            if (col.Dimension > buffer.Height)
             {
-                temp.Resize(col.Dimension, temp.Columns);
+                buffer.Resize(col.Dimension, buffer.Columns);
             }
 
-            for (int i = 0; i < temp.Rows; i++)
-            {
-                if (i < col.Dimension)
-                {
-                    temp[i, index] = col[i].Clone();
-                }
-                else
-                {
-                    temp[i, index] = fieldZero.Clone();
-                }
-            }
+            buffer._definingArray.Assign(ind => col[ind[0]].Clone(), new int[] { 0, index }, new int[] { col.Dimension, index + 1 });
 
-            definingArray = temp.definingArray;
+            _definingArray = buffer._definingArray;
 
-            computationCache.SetAllUpdateStates(true);
+            _computationCache.SetAllUpdateStates(true);
         }
 
         public T Minor(int row, int col)
@@ -400,10 +342,10 @@ namespace RedMath.LinearAlgebra
 
         public T Cofactor(int row, int col)
         {
-            return Minor(row, col).Multiply((row + col) % 2 == 0 ? fieldOne : fieldOne.AdditiveInverse);
+            return Minor(row, col).Multiply((row + col) % 2 == 0 ? _fieldOne : _fieldOne.AdditiveInverse);
         }
 
-        private Matrix<T> computeCofactorMatrix()
+        private Matrix<T> ComputeCofactorMatrix()
         {
             if (!IsSquareMatrix)
             {
@@ -412,17 +354,17 @@ namespace RedMath.LinearAlgebra
 
             T[,] cofactorMat = new T[Rows, Columns];
 
-            cofactorMat.Assign(ind => Cofactor(ind[0], ind[1]));
+            cofactorMat.AssignAll(ind => Cofactor(ind[0], ind[1]));
 
             return new Matrix<T>(cofactorMat);
         }
 
-        private LUPDecomposition<T> computeDecomposition()
+        private LUPDecomposition<T> ComputeDecomposition()
         {
             return new LUPDecomposition<T>(this);
         }
 
-        private T computeDeterminant()
+        private T ComputeDeterminant()
         {
             if (!IsSquareMatrix)
             {
@@ -431,7 +373,7 @@ namespace RedMath.LinearAlgebra
 
             if (Height == 1)
             {
-                return definingArray[0, 0];
+                return _definingArray[0, 0];
             }
 
             T det = Decomposition.LowerMatrix.MainDiagonal.FieldProduct().Multiply(Decomposition.UpperMatrix.MainDiagonal.FieldProduct());
@@ -446,7 +388,7 @@ namespace RedMath.LinearAlgebra
             }
         }
 
-        private Tuple<Matrix<T>, List<IMatrixOperation<T>>> computeEchelonForm()
+        private Tuple<Matrix<T>, List<IMatrixOperation<T>>> ComputeEchelonForm()
         {
             Matrix<T> reducedMat = new Matrix<T>(this);
             List<IMatrixOperation<T>> reductionOperations = new List<IMatrixOperation<T>>();
@@ -458,12 +400,12 @@ namespace RedMath.LinearAlgebra
             for (int col = 0; col < Math.Min(reducedMat.Rows, reducedMat.Columns); col++)
             {
                 isZeroColumn = false;
-                if (reducedMat[col - rowOffset, col].Equals(fieldZero))
+                if (reducedMat._definingArray[col - rowOffset, col] == _fieldZero)
                 {
                     isZeroColumn = true;
                     for (int row = col + 1 - rowOffset; row < reducedMat.Height; row++)
                     {
-                        if (!reducedMat[row, col].Equals(fieldZero))
+                        if (reducedMat._definingArray[row, col] != _fieldZero)
                         {
                             reductionOperations.Add(new SwapRows<T>(row, col - rowOffset));
                             reductionOperations[reductionOperations.Count - 1].ApplyTo(reducedMat);
@@ -479,24 +421,24 @@ namespace RedMath.LinearAlgebra
                     continue;
                 }
 
-                reductionOperations.Add(new MultiplyRowByScalar<T>(col - rowOffset, reducedMat[col - rowOffset, col].MultiplicativeInverse));
+                reductionOperations.Add(new MultiplyRowByScalar<T>(col - rowOffset, reducedMat._definingArray[col - rowOffset, col].MultiplicativeInverse));
                 reductionOperations[reductionOperations.Count - 1].ApplyTo(reducedMat);
 
-                reducedMat[col - rowOffset, col] = fieldOne.Clone(); // This line is in place to eliminate the possibility of rounding errors
+                reducedMat._definingArray[col - rowOffset, col] = _fieldOne.Clone(); // This line is in place to eliminate the possibility of rounding errors
 
                 for (int row = col + 1 - rowOffset; row < reducedMat.Rows; row++)
                 {
-                    reductionOperations.Add(new AddRowMultiple<T>(col - rowOffset, row, reducedMat[row, col].AdditiveInverse));
+                    reductionOperations.Add(new AddRowMultiple<T>(col - rowOffset, row, reducedMat._definingArray[row, col].AdditiveInverse));
                     reductionOperations[reductionOperations.Count - 1].ApplyTo(reducedMat);
 
-                    reducedMat[row, col] = fieldZero.Clone(); // This line is in place to eliminate the possibility of rounding errors
+                    reducedMat._definingArray[row, col] = _fieldZero.Clone(); // This line is in place to eliminate the possibility of rounding errors
                 }
             }
 
             return new Tuple<Matrix<T>, List<IMatrixOperation<T>>>(reducedMat, reductionOperations);
         }
 
-        private Tuple<Matrix<T>, List<IMatrixOperation<T>>> computeReducedEchelonForm()
+        private Tuple<Matrix<T>, List<IMatrixOperation<T>>> ComputeReducedEchelonForm()
         {
             Matrix<T> reducedEchelonFormMatrix = EchelonForm;
             List<IMatrixOperation<T>> reductionOperations = new List<IMatrixOperation<T>>();
@@ -510,7 +452,7 @@ namespace RedMath.LinearAlgebra
                 isZeroRow = true;
                 for (int col = 0; col < reducedEchelonFormMatrix.Columns; col++)
                 {
-                    if (reducedEchelonFormMatrix[baseRow, col].Equals(fieldOne))
+                    if (reducedEchelonFormMatrix._definingArray[baseRow, col] == _fieldOne)
                     {
                         entryIndex = col;
                         isZeroRow = false;
@@ -525,10 +467,10 @@ namespace RedMath.LinearAlgebra
 
                 for (int currentRow = 0; currentRow < baseRow; currentRow++)
                 {
-                    reductionOperations.Add(new AddRowMultiple<T>(baseRow, currentRow, reducedEchelonFormMatrix[currentRow, entryIndex].AdditiveInverse));
+                    reductionOperations.Add(new AddRowMultiple<T>(baseRow, currentRow, reducedEchelonFormMatrix._definingArray[currentRow, entryIndex].AdditiveInverse));
                     reductionOperations[reductionOperations.Count - 1].ApplyTo(reducedEchelonFormMatrix);
 
-                    reducedEchelonFormMatrix[currentRow, entryIndex] = fieldZero.Clone(); // This line is in place to eliminate the possibility of rounding errors
+                    reducedEchelonFormMatrix._definingArray[currentRow, entryIndex] = _fieldZero.Clone(); // This line is in place to eliminate the possibility of rounding errors
                 }
             }
 
@@ -539,22 +481,22 @@ namespace RedMath.LinearAlgebra
             return new Tuple<Matrix<T>, List<IMatrixOperation<T>>>(reducedEchelonFormMatrix, reducedEchelonFormOperations);
         }
 
-        private Matrix<T> computeInverse()
+        private Matrix<T> ComputeInverse()
         {
             if (!IsSquareMatrix)
             {
                 throw new InvalidOperationException("A non-square matrix doesn't have an inverse.");
             }
-            else if (Determinant.Equals(fieldZero))
+            else if (!ReducedEchelonForm.IsIdentity)
             {
-                throw new InvalidOperationException("A matrix with determinant 0 doesn't have an inverse.");
+                throw new InvalidOperationException("This matrix doesn't have an inverse since its reduced echelon form is not the identity matrix.");
             }
 
             Matrix<T> inverseMat = new Matrix<T>(Rows, Columns);
 
             for (int i = 0; i < Rows; i++)
             {
-                inverseMat[i, i] = new T().One;
+                inverseMat._definingArray[i, i] = _fieldOne.Clone();
             }
 
             foreach (var op in ReducedEchelonFormReductionOperations)
@@ -565,7 +507,7 @@ namespace RedMath.LinearAlgebra
             return inverseMat;
         }
 
-        private bool testForIdentity()
+        private bool TestForIdentity()
         {
             bool isIdentity = true;
 
@@ -578,12 +520,12 @@ namespace RedMath.LinearAlgebra
             {
                 for (int col = 0; col < Width && isIdentity; col++)
                 {
-                    if (col == row && !definingArray[row, col].Equals(fieldOne))
+                    if (col == row && _definingArray[row, col] != _fieldOne)
                     {
                         isIdentity = false;
                         break;
                     }
-                    else if (col != row && !definingArray[row, col].Equals(fieldZero))
+                    else if (col != row && _definingArray[row, col] != _fieldZero)
                     {
                         isIdentity = false;
                         break;
@@ -599,7 +541,7 @@ namespace RedMath.LinearAlgebra
             return isIdentity;
         }
 
-        private bool testForLowerTriangular()
+        private bool TestForLowerTriangular()
         {
             if (!IsSquareMatrix)
             {
@@ -610,7 +552,7 @@ namespace RedMath.LinearAlgebra
             {
                 for (int col = row + 1; col < Columns; col++)
                 {
-                    if (definingArray[row, col] != fieldZero)
+                    if (_definingArray[row, col] != _fieldZero)
                     {
                         return false;
                     }
@@ -620,7 +562,7 @@ namespace RedMath.LinearAlgebra
             return true;
         }
 
-        private bool testForUpperTriangular()
+        private bool TestForUpperTriangular()
         {
             if (!IsSquareMatrix)
             {
@@ -631,7 +573,7 @@ namespace RedMath.LinearAlgebra
             {
                 for (int col = 0; col < row; col++)
                 {
-                    if (!definingArray[row, col].Equals(fieldZero))
+                    if (_definingArray[row, col] == _fieldZero)
                     {
                         return false;
                     }
@@ -641,27 +583,16 @@ namespace RedMath.LinearAlgebra
             return true;
         }
 
-        private int computeRank()
+        private int ComputeRank()
         {
-            Matrix<T> reducedMat = ReducedEchelonForm;
-            int rank = Rows;
+            int rank = 0;
+            Matrix<T> reducedForm = ReducedEchelonForm;
 
-            for (int i = 0; i < Height; i++)
+            for (int i = 0; i < Math.Min(reducedForm.Rows, reducedForm.Columns); i++)
             {
-                bool isZeroRow = true;
-
-                for (int j = 0; j < Width; j++)
+                if (reducedForm._definingArray[i, i] == _fieldOne)
                 {
-                    if (definingArray[i, j] != fieldZero)
-                    {
-                        isZeroRow = false;
-                        break;
-                    }
-                }
-
-                if (isZeroRow)
-                {
-                    rank--;
+                    rank++;
                 }
             }
 
@@ -676,11 +607,11 @@ namespace RedMath.LinearAlgebra
                 throw new InvalidOperationException("Matrices of different sizes can't be added.");
             }
 
-            T[,] temp = new T[left.Height, left.Width];
+            T[,] buffer = new T[left.Height, left.Width];
 
-            temp.Assign(ind => left[ind[0], ind[1]] + right[ind[0], ind[1]]);
-            
-            return new Matrix<T>(temp);
+            buffer.AssignAll(ind => left._definingArray[ind[0], ind[1]] + right._definingArray[ind[0], ind[1]]);
+
+            return new Matrix<T>(buffer);
         }
 
         public static Matrix<T> operator -(Matrix<T> left, Matrix<T> right)
@@ -690,29 +621,29 @@ namespace RedMath.LinearAlgebra
                 throw new InvalidOperationException("Matrices of different sizes can't be subtracted.");
             }
 
-            T[,] temp = new T[left.Height, left.Width];
+            T[,] buffer = new T[left.Height, left.Width];
 
-            temp.Assign(ind => left[ind[0], ind[1]] - right[ind[0], ind[1]]);
+            buffer.AssignAll(ind => left._definingArray[ind[0], ind[1]] - right._definingArray[ind[0], ind[1]]);
 
-            return new Matrix<T>(temp);
+            return new Matrix<T>(buffer);
         }
 
         public static Matrix<T> operator -(Matrix<T> mat)
         {
-            T[,] temp = new T[mat.Height, mat.Width];
+            T[,] buffer = new T[mat.Height, mat.Width];
 
-            temp.Assign(ind => -mat[ind[0], ind[1]]);
+            buffer.AssignAll(ind => -mat._definingArray[ind[0], ind[1]]);
 
-            return new Matrix<T>(temp);
+            return new Matrix<T>(buffer);
         }
 
         public static Matrix<T> operator *(Matrix<T> mat, T scalar)
         {
-            T[,] temp = new T[mat.Height, mat.Width];
+            T[,] buffer = new T[mat.Height, mat.Width];
 
-            temp.Assign(ind => mat[ind[0], ind[1]] * scalar);
+            buffer.AssignAll(ind => mat._definingArray[ind[0], ind[1]] * scalar);
 
-            return new Matrix<T>(temp);
+            return new Matrix<T>(buffer);
         }
 
         public static Matrix<T> operator *(T scalar, Matrix<T> mat)
@@ -729,18 +660,16 @@ namespace RedMath.LinearAlgebra
 
             T[,] multResult = new T[left.Height, right.Width];
 
-            multResult.Assign(ind => fieldZero.Clone());
-
-            multResult.Assign(ind =>
+            multResult.AssignAll(ind =>
             {
                 int i = ind[0];
                 int j = ind[1];
 
-                T sum = fieldZero.Clone();
+                T sum = _fieldZero.Clone();
 
                 for (int k = 0; k < left.Width; k++)
                 {
-                    sum += left.definingArray[i, k] * right.definingArray[k, j];
+                    sum += left._definingArray[i, k] * right._definingArray[k, j];
                 }
 
                 return sum;
@@ -753,13 +682,7 @@ namespace RedMath.LinearAlgebra
         {
             T[,] defArrClone = new T[mat.Rows, mat.Columns];
 
-            for (int i = 0; i < mat.Rows; i++)
-            {
-                for (int j = 0; j < mat.Columns; j++)
-                {
-                    defArrClone[i, j] = mat[i, j].Clone();
-                }
-            }
+            defArrClone.AssignAll(ind => mat[ind[0], ind[1]]);
 
             return defArrClone;
         }
@@ -778,9 +701,7 @@ namespace RedMath.LinearAlgebra
         #region Object Overrides
         public override bool Equals(object obj)
         {
-            Matrix<T> other = obj as Matrix<T>;
-
-            if ((object)other == null)
+            if (!(obj is Matrix<T> other))
             {
                 return false;
             }
@@ -794,7 +715,7 @@ namespace RedMath.LinearAlgebra
             {
                 for (int j = 0; j < Width; j++)
                 {
-                    if (definingArray[i, j] != other[i, j])
+                    if (_definingArray[i, j] != other._definingArray[i, j])
                     {
                         return false;
                     }
@@ -812,7 +733,7 @@ namespace RedMath.LinearAlgebra
             {
                 for (int j = 0; j < Width; j++)
                 {
-                    sum += definingArray[i, j].GetHashCode();
+                    sum += _definingArray[i, j].GetHashCode();
                 }
             }
 
@@ -830,7 +751,7 @@ namespace RedMath.LinearAlgebra
             {
                 for (int j = 0; j < Columns; j++)
                 {
-                    digits = definingArray[i, j].ToString().Length;
+                    digits = _definingArray[i, j].ToString().Length;
 
                     if (digits > charCount[j])
                     {
@@ -848,11 +769,11 @@ namespace RedMath.LinearAlgebra
             {
                 for (int j = 0; j < Columns; j++)
                 {
-                    res.Append(definingArray[i, j]);
+                    res.Append(_definingArray[i, j]);
 
                     if (j < Columns - 1)
                     {
-                        digits = definingArray[i, j].ToString().Length;
+                        digits = _definingArray[i, j].ToString().Length;
 
                         for (int k = digits; k < charCount[j]; k++)
                         {
