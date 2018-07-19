@@ -655,7 +655,7 @@ namespace RedMath.LinearAlgebra
         {
             if (left.Width != right.Height)
             {
-                throw new InvalidOperationException("Matrices of incompatible sizes can't be multiplied.");
+                throw new InvalidOperationException("The matrices given are of incompatible sizes and can't be multiplied.");
             }
 
             T[,] multResult = new T[left.Height, right.Width];
@@ -676,6 +676,58 @@ namespace RedMath.LinearAlgebra
             });
 
             return new Matrix<T>(multResult);
+        }
+
+        public static Vector<T> operator *(Matrix<T> mat, Vector<T> vec)
+        {
+            if (mat.Width != vec.Dimension)
+            {
+                throw new InvalidOperationException("The matrix and vector given are of incompatible sizes and can't be multiplied.");
+            }
+
+            T[] multResult = new T[vec.Dimension];
+
+            multResult.AssignAll(ind =>
+            {
+                int i = ind[0];
+
+                T sum = _fieldZero.Clone();
+
+                for (int k = 0; k < vec.Dimension; k++)
+                {
+                    sum += mat._definingArray[i, k] * vec[k];
+                }
+
+                return sum;
+            });
+
+            return new Vector<T>(multResult);
+        }
+
+        public static Vector<T> operator *(Vector<T> vec, Matrix<T> mat)
+        {
+            if (vec.Dimension != mat.Height)
+            {
+                throw new InvalidOperationException("The vector and matrix given are of incompatible sizes and can't be multiplied.");
+            }
+
+            T[] multResult = new T[vec.Dimension];
+
+            multResult.AssignAll(ind =>
+            {
+                int j = ind[0];
+
+                T sum = _fieldZero.Clone();
+
+                for (int k = 0; k < vec.Dimension; k++)
+                {
+                    sum += vec[k] * mat._definingArray[k, j];
+                }
+
+                return sum;
+            });
+
+            return new Vector<T>(multResult);
         }
 
         public static implicit operator T[,] (Matrix<T> mat)

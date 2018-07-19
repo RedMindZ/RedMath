@@ -14,9 +14,9 @@ namespace RedMathTests
         (
             new Real[,]
             {
-                { 1,    2,    7,   3 },
-                { 3,   -1,    4.6, 4 },
-                { 1.2, -3.4, -10,  9 }
+                { 1,  2,   7, 3 },
+                { 3, -1,   4, 4 },
+                { 1, -3, -10, 9 }
             }
         );
 
@@ -24,8 +24,8 @@ namespace RedMathTests
         (
             new Real[,]
             {
-                { 1,  2,  7  },
-                { 3, -1,  4  },
+                { 1,  2,   7 },
+                { 3, -1,   4 },
                 { 5,  4, -10 }
             }
         );
@@ -105,7 +105,7 @@ namespace RedMathTests
         [TestMethod]
         public void AntiDiagonal()
         {
-            Real[] expected = new Real[] { 1.2, -1, 7 };
+            Real[] expected = new Real[] { 1, -1, 7 };
 
             Assert.AreEqual(expected[0], TestMatrix1.AntiDiagonal[0]);
             Assert.AreEqual(expected[1], TestMatrix1.AntiDiagonal[1]);
@@ -233,8 +233,8 @@ namespace RedMathTests
             (
                 new Real[,]
                 {
-                    { 1, 7,   3 },
-                    { 3, 4.6, 4 }
+                    { 1, 7, 3 },
+                    { 3, 4, 4 }
                 }
             );
 
@@ -272,7 +272,7 @@ namespace RedMathTests
         [TestMethod]
         public void GetRowVector()
         {
-            Assert.AreEqual(new Vector<Real>(3, -1, 4.6, 4), TestMatrix1.GetRowVector(1));
+            Assert.AreEqual(new Vector<Real>(3, -1, 4, 4), TestMatrix1.GetRowVector(1));
         }
 
         [TestMethod]
@@ -291,10 +291,10 @@ namespace RedMathTests
             (
                 new Real[,]
                 {
-                    { 1,    2,    7,   3 },
-                    { 3,   -1,    4.6, 4 },
-                    { 1.2, -3.4, -10,  9 },
-                    { 2,    3,    0,   0 }
+                    { 1,  2,   7, 3 },
+                    { 3, -1,   4, 4 },
+                    { 1, -3, -10, 9 },
+                    { 2,  3,   0, 0 }
                 }
             );
 
@@ -311,10 +311,10 @@ namespace RedMathTests
             (
                 new Real[,]
                 {
-                    { 1,    2,    7,   3 },
-                    { 2,    3,    0,   0 },
-                    { 3,   -1,    4.6, 4 },
-                    { 1.2, -3.4, -10,  9 }
+                    { 1,  2,   7, 3 },
+                    { 2,  3,   0, 0 },
+                    { 3, -1,   4, 4 },
+                    { 1, -3, -10, 9 }
                 }
             );
 
@@ -331,9 +331,9 @@ namespace RedMathTests
             (
                 new Real[,]
                 {
-                    { 1,    2,    7,   3, 2 },
-                    { 3,   -1,    4.6, 4, 3 },
-                    { 1.2, -3.4, -10,  9, 0 },
+                    { 1,  2,   7, 3, 2 },
+                    { 3, -1,   4, 4, 3 },
+                    { 1, -3, -10, 9, 0 },
                 }
             );
 
@@ -350,9 +350,9 @@ namespace RedMathTests
             (
                 new Real[,]
                 {
-                    { 1,   2,  2,    7,   3 },
-                    { 3,   3, -1,    4.6, 4 },
-                    { 1.2, 0, -3.4, -10,  9 }
+                    { 1, 2,  2,   7, 3 },
+                    { 3, 3, -1,   4, 4 },
+                    { 1, 0, -3, -10, 9 }
                 }
             );
 
@@ -369,6 +369,40 @@ namespace RedMathTests
         public void Cofactor()
         {
             Assert.AreEqual(-7, TestMatrix2.Cofactor(2, 2));
+        }
+
+        [TestMethod]
+        public void MatrixMatrixMultiplication()
+        {
+            Matrix<Real> expected = new Matrix<Real>
+            (
+                new Real[,]
+                {
+                    { 14, -21, - 55,  74 },
+                    { 4,  - 5, - 23,  41 },
+                    { 7,   36,  151, -59 }
+                }
+            );
+
+            Assert.AreEqual(expected, TestMatrix2 * TestMatrix1);
+        }
+
+        [TestMethod]
+        public void MatrixVectorMultiplication()
+        {
+            Vector<Real> testVector = new Vector<Real>(5, 2, 9);
+            Vector<Real> expected = new Vector<Real>(72, 49, -57);
+
+            Assert.AreEqual(expected, TestMatrix2 * testVector);
+        }
+
+        [TestMethod]
+        public void VectorMatrixMultiplication()
+        {
+            Vector<Real> testVector = new Vector<Real>(3, 6, 4);
+            Vector<Real> expected = new Vector<Real>(41, 16, 5);
+
+            Assert.AreEqual(expected, testVector * TestMatrix2);
         }
     }
 }
