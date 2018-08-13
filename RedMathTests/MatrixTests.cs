@@ -30,6 +30,16 @@ namespace RedMathTests
             }
         );
 
+        public static Matrix<GF5> H = new Matrix<GF5>
+        (
+            new GF5[,]
+            {
+                { new GF5(1), new GF5(2), new GF5(4), new GF5(2), new GF5(4), new GF5(2), new GF5(1) },
+                { new GF5(4), new GF5(2), new GF5(2), new GF5(3), new GF5(3), new GF5(4), new GF5(2) },
+                { new GF5(1), new GF5(3), new GF5(3), new GF5(3), new GF5(2), new GF5(2), new GF5(4) }
+            }
+        );
+
         [TestMethod]
         public void Height()
         {
@@ -403,6 +413,12 @@ namespace RedMathTests
             Vector<Real> expected = new Vector<Real>(41, 16, 5);
 
             Assert.AreEqual(expected, testVector * TestMatrix2);
+        }
+
+        [TestMethod]
+        public void GF5Test()
+        {
+            Debug.WriteLine(H.ReducedEchelonForm);
         }
     }
 }

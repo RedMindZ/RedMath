@@ -35,6 +35,11 @@
   <ItemGroup>
     <!-- C# source files -->
     <Compile Include="Algebra.cs" />
+    <Compile Include="Calculus\Function.cs" />
+    <Compile Include="Calculus\IDifferentiableFunction.cs" />
+    <Compile Include="Calculus\IParametricallyDifferentiableFunction.cs" />
+    <Compile Include="Calculus\Monomial.cs" />
+    <Compile Include="Calculus\ParametricFunction.cs" />
     <Compile Include="FFT.cs" />
     <Compile Include="Gpu\GpuField.cs" Condition="$(DefineConstants.Contains(GPU_SUPPORT))" />
     <Compile Include="HighPerformance\Cpu\CpuMatrixMultiplication.cs" />
@@ -53,6 +58,7 @@
     <Compile Include="Gpu\GpuComplex.cs" Condition="$(DefineConstants.Contains(GPU_SUPPORT))" />
     <Compile Include="Gpu\GpuRational.cs" Condition="$(DefineConstants.Contains(GPU_SUPPORT))" />
     <Compile Include="Gpu\GpuReal.cs" Condition="$(DefineConstants.Contains(GPU_SUPPORT))" />
+    <Compile Include="Structures\GF5.cs" />
     <Compile Include="Structures\Rational.cs" />
     <Compile Include="Structures\Real.cs" />
     <Compile Include="Utils\MultiIndex.cs" />

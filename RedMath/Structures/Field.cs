@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Diagnostics;
 
 namespace RedMath.Structures
 {
@@ -83,7 +84,7 @@ namespace RedMath.Structures
 
         public override bool Equals(object obj)
         {
-            if (obj == null || !GetType().Equals(obj))
+            if (obj == null || GetType() != obj.GetType())
             {
                 return false;
             }
