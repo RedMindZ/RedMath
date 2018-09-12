@@ -400,19 +400,19 @@ namespace RedMathTests
         [TestMethod]
         public void MatrixVectorMultiplication()
         {
-            Vector<Real> testVector = new Vector<Real>(5, 2, 9);
-            Vector<Real> expected = new Vector<Real>(72, 49, -57);
+            Vector<Real> testVector = new Vector<Real>(3, 6, 4, 4);
+            Vector<Real> expected = new Vector<Real>(55, 35, -19);
 
-            Assert.AreEqual(expected, TestMatrix2 * testVector);
+            Assert.AreEqual(expected, TestMatrix1 * testVector);
         }
 
         [TestMethod]
         public void VectorMatrixMultiplication()
         {
-            Vector<Real> testVector = new Vector<Real>(3, 6, 4);
-            Vector<Real> expected = new Vector<Real>(41, 16, 5);
+            Vector<Real> testVector = new Vector<Real>(3, 6, 4, 4);
+            Vector<Real> expected = new Vector<Real>(55, 35, -19);
 
-            Assert.AreEqual(expected, testVector * TestMatrix2);
+            Assert.AreEqual(expected, testVector * TestMatrix1);
         }
 
         [TestMethod]

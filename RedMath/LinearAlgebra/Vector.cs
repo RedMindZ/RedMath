@@ -7,7 +7,7 @@ namespace RedMath.LinearAlgebra
     /// Potentialy usefull class for implementing special vector spaces like R[x] (the polynomial vector space).
     /// Currently in development and may not be ready for use.
     /// </summary>
-    public abstract class VectorBase<T, F> where T : VectorBase<T, F> where F : Field<F>
+    public abstract class VectorBase<T, F> where T : VectorBase<T, F> where F : Field<F>, new()
     {
         public abstract T Zero { get; }
 
@@ -58,7 +58,7 @@ namespace RedMath.LinearAlgebra
 
                     for (int i = Dimension; i < temp.Length; i++)
                     {
-                        temp[i] = new T().Zero.Clone();
+                        temp[i] = Field<T>.Zero;
                     }
 
                     components = temp;
@@ -152,7 +152,7 @@ namespace RedMath.LinearAlgebra
                     comp[i] = components[i];
                 }
 
-                comp[comp.Length - 1] = new T().One;
+                comp[comp.Length - 1] = Field<T>.One;
 
                 return new Vector<T>(comp);
             }
@@ -177,7 +177,7 @@ namespace RedMath.LinearAlgebra
 
             for (int i = 0; i < dim; i++)
             {
-                components[i] = new T().Zero.Clone();
+                components[i] = Field<T>.Zero;
             }
         }
 
@@ -195,7 +195,7 @@ namespace RedMath.LinearAlgebra
 
         public T Sum()
         {
-            T sum = new T().Zero;
+            T sum = Field<T>.Zero;
 
             for (int i = 0; i < Dimension; i++)
             {
@@ -233,7 +233,7 @@ namespace RedMath.LinearAlgebra
         {
             Vector<T> normalVec = new Vector<T>(vec.Dimension - 1);
 
-            if (vec.Last == new T().Zero)
+            if (vec.Last == Field<T>.Zero)
             {
                 for (int i = 0; i < normalVec.Dimension; i++)
                 {

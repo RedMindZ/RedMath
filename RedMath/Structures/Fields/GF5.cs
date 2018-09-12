@@ -4,12 +4,12 @@ namespace RedMath.Structures
 {
     public class GF5 : Field<GF5>
     {
-        private static Dictionary<int, int> _inverseTable = new Dictionary<int, int> { { 1, 1 }, { 2, 3 }, { 3, 2 }, { 4, 4 } };
+        private static readonly Dictionary<int, int> _inverseTable = new Dictionary<int, int> { { 1, 1 }, { 2, 3 }, { 3, 2 }, { 4, 4 } };
 
         public int Value { get; set; }
 
-        public override GF5 Zero => new GF5(0);
-        public override GF5 One => new GF5(1);
+        protected override GF5 _zero => new GF5(0);
+        protected override GF5 _one => new GF5(1);
 
         public GF5()
         {

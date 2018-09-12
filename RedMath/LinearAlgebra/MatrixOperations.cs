@@ -191,7 +191,7 @@ namespace RedMath.LinearAlgebra.MatrixOperations
 
             for (int i = 0; i < IndexList.Count; i++)
             {
-                mat[i, IndexList[i]] = new T().One;
+                mat[i, IndexList[i]] = Field<T>.One;
             }
 
             return mat;

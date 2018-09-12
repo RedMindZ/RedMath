@@ -28,7 +28,7 @@ namespace RedMath.Utils
 
         public static T FieldSum<T>(this T[] seq) where T : Field<T>, new()
         {
-            T sum = new T().Zero;
+            T sum = Field<T>.Zero;
 
             for (int i = 0; i < seq.Length; i++)
             {
@@ -40,7 +40,7 @@ namespace RedMath.Utils
 
         public static T FieldProduct<T>(this T[] seq) where T : Field<T>, new()
         {
-            T prod = new T().One;
+            T prod = Field<T>.One;
 
             for (int i = 0; i < seq.Length; i++)
             {

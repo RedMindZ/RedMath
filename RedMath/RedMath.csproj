@@ -52,15 +52,22 @@
     <Compile Include="LinearAlgebra\Vector.cs" />
     <Compile Include="LinearAlgebra\VectorSpace.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="Structures\Complex.cs" />
+    <Compile Include="Structures\Fields\Complex.cs" />
     <Compile Include="Structures\Expression\ExpressionNode.cs" />
-    <Compile Include="Structures\Field.cs" />
+    <Compile Include="Structures\Fields\Field.cs" />
     <Compile Include="Gpu\GpuComplex.cs" Condition="$(DefineConstants.Contains(GPU_SUPPORT))" />
     <Compile Include="Gpu\GpuRational.cs" Condition="$(DefineConstants.Contains(GPU_SUPPORT))" />
     <Compile Include="Gpu\GpuReal.cs" Condition="$(DefineConstants.Contains(GPU_SUPPORT))" />
-    <Compile Include="Structures\GF5.cs" />
-    <Compile Include="Structures\Rational.cs" />
-    <Compile Include="Structures\Real.cs" />
+    <Compile Include="Structures\Fields\GF7.cs" />
+    <Compile Include="Structures\Fields\GF5.cs" />
+    <Compile Include="Structures\LinearSpaces\CoordinateSpace.cs" />
+    <Compile Include="Structures\LinearSpaces\DynamicDimensionCoordinateSpace.cs" />
+    <Compile Include="Structures\LinearSpaces\LinearSpace.cs" />
+    <Compile Include="Structures\Fields\Rational.cs" />
+    <Compile Include="Structures\Fields\Real.cs" />
+    <Compile Include="Structures\LinearSpaces\RealVector.cs" />
+    <Compile Include="Structures\LinearSpaces\RealVector3.cs" />
+    <Compile Include="Structures\LinearSpaces\StaticDimensionCoordinateSpace.cs" />
     <Compile Include="Utils\MultiIndex.cs" />
     <Compile Include="Utils\Utilities.cs" />
     <Compile Include="Utils\Cache.cs" />

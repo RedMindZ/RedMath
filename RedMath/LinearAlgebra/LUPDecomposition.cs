@@ -21,10 +21,9 @@ namespace RedMath.LinearAlgebra
             List<IMatrixOperation<T>> reductionOps = new List<IMatrixOperation<T>>(mat.EchelonFormReductionOperations);
             reductionOps.Reverse();
 
-            Field<T> fieldOne = new T().One;
             for (int i = 0; i < Math.Min(LowerMatrix.Rows, LowerMatrix.Columns); i++)
             {
-                LowerMatrix[i, i] = fieldOne.Clone();
+                LowerMatrix[i, i] = Field<T>.One;
             }
 
             int[] permArr = new int[mat.Rows];

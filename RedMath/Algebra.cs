@@ -75,32 +75,32 @@ namespace RedMath
         
         public static T IntPower<T>(T b, int n) where T : Field<T>, new()
         {
-            T sum = new T().One;
+            T prod = Field<T>.One;
 
             if (n > 0)
             {
                 for (int i = 0; i < n; i++)
                 {
-                    sum *= b;
+                    prod *= b;
                 }
             }
 
-            return sum;
+            return prod;
         }
 
         public static long IntPower(int b, int n)
         {
-            long sum = 1;
+            long prod = 1;
 
             if (n > 0)
             {
                 for (int i = 0; i < n; i++)
                 {
-                    sum *= b;
+                    prod *= b;
                 }
             }
 
-            return sum;
+            return prod;
         }
 
         public static long GreatestCommonDivisor(long left, long right)

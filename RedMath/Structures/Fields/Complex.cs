@@ -19,61 +19,19 @@ namespace RedMath.Structures
             }
         }
 
-        public Complex Reciprocal
-        {
-            get
-            {
-                return new Complex(Real / (Real * Real + Imaginary * Imaginary), -Imaginary / (Real * Real + Imaginary * Imaginary));
-            }
-        }
+        public Complex Reciprocal => new Complex(Real / (Real * Real + Imaginary * Imaginary), -Imaginary / (Real * Real + Imaginary * Imaginary));
 
-        public double AbsoluteValue
-        {
-            get
-            {
-                return Math.Sqrt(Real * Real + Imaginary * Imaginary);
-            }
-        }
+        public double AbsoluteValue => Math.Sqrt(Real * Real + Imaginary * Imaginary);
 
-        public double Phase
-        {
-            get
-            {
-                return Math.Atan2(Real, Imaginary);
-            }
-        }
+        public double Phase => Math.Atan2(Real, Imaginary);
 
-        public override Complex Zero
-        {
-            get
-            {
-                return new Complex(0, 0);
-            }
-        }
+        protected override Complex _zero => new Complex(0, 0);
 
-        public override Complex One
-        {
-            get
-            {
-                return new Complex(1, 0);
-            }
-        }
+        protected override Complex _one => new Complex(1, 0);
 
-        public override Complex AdditiveInverse
-        {
-            get
-            {
-                return -this;
-            }
-        }
+        public override Complex AdditiveInverse => new Complex(-Real, -Imaginary);
 
-        public override Complex MultiplicativeInverse
-        {
-            get
-            {
-                return this.Reciprocal;
-            }
-        }
+        public override Complex MultiplicativeInverse => Reciprocal;
 
         public Complex()
         {
@@ -99,39 +57,19 @@ namespace RedMath.Structures
             Imaginary = other.Imaginary;
         }
 
-        public Complex Conjugate
-        {
-            get
-            {
-                return new Complex(Real, -Imaginary);
-            }
-        }
+        public Complex Conjugate => new Complex(Real, -Imaginary);
 
-        public static bool operator ==(Complex a, Complex b)
-        {
-            return a.Equals(b);
-        }
+        public static bool operator ==(Complex a, Complex b) => a.Equals(b);
 
-        public static bool operator !=(Complex a, Complex b)
-        {
-            return !(a.Equals(b));
-        }
+        public static bool operator !=(Complex a, Complex b) => !(a.Equals(b));
 
-        public static implicit operator Vector<Real>(Complex a)
-        {
-            return new Vector<Real>(a.Real, a.Imaginary);
-        }
+        public static implicit operator Vector<Real>(Complex a) => new Vector<Real>(a.Real, a.Imaginary);
 
-        public static implicit operator Complex(Real a)
-        {
-            return new Complex(a, 0);
-        }
+        public static implicit operator Complex(Real a) => new Complex(a, 0);
 
         public override bool Equals(object obj)
         {
-            Complex instance = obj as Complex;
-
-            if ((object)instance == null)
+            if (!(obj is Complex instance))
             {
                 return false;
             }

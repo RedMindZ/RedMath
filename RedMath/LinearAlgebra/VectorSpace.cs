@@ -121,7 +121,7 @@ namespace RedMath.LinearAlgebra
 
             for (int i = basis.Length; i < Dimension; i++)
             {
-                if (reducedVec[i, 0] != new T().Zero)
+                if (reducedVec[i, 0] != Field<T>.Zero)
                 {
                     return false;
                 }

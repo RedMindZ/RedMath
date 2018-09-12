@@ -14,8 +14,8 @@ namespace RedMath.LinearAlgebra
         private T[,] _definingArray;
         private Cache<string> _computationCache = new Cache<string>();
 
-        private static T _fieldZero = new T().Zero;
-        private static T _fieldOne = new T().One;
+        //private static T _fieldZero = new T()._zero;
+        //private static T _fieldOne = new T()._one;
         #endregion
 
         #region Size Properties
@@ -115,7 +115,7 @@ namespace RedMath.LinearAlgebra
         {
             _definingArray = new T[rows, cols];
 
-            _definingArray.AssignAll(ind => _fieldZero.Clone());
+            _definingArray.AssignAll(ind => Field<T>.Zero);
 
             InitCache();
         }
@@ -198,7 +198,7 @@ namespace RedMath.LinearAlgebra
                     }
                     else
                     {
-                        buffer[i, j] = _fieldZero.Clone();
+                        buffer[i, j] = Field<T>.Zero;
                     }
                 }
             }
@@ -342,7 +342,7 @@ namespace RedMath.LinearAlgebra
 
         public T Cofactor(int row, int col)
         {
-            return Minor(row, col).Multiply((row + col) % 2 == 0 ? _fieldOne : _fieldOne.AdditiveInverse);
+            return Minor(row, col).Multiply((row + col) % 2 == 0 ? Field<T>.One : Field<T>.One.AdditiveInverse);
         }
 
         private Matrix<T> ComputeCofactorMatrix()
@@ -400,12 +400,12 @@ namespace RedMath.LinearAlgebra
             for (int col = 0; col < Math.Min(reducedMat.Rows, reducedMat.Columns); col++)
             {
                 isZeroColumn = false;
-                if (reducedMat._definingArray[col - rowOffset, col] == _fieldZero)
+                if (reducedMat._definingArray[col - rowOffset, col] == Field<T>.Zero)
                 {
                     isZeroColumn = true;
                     for (int row = col + 1 - rowOffset; row < reducedMat.Height; row++)
                     {
-                        if (reducedMat._definingArray[row, col] != _fieldZero)
+                        if (reducedMat._definingArray[row, col] != Field<T>.Zero)
                         {
                             reductionOperations.Add(new SwapRows<T>(row, col - rowOffset));
                             reductionOperations[reductionOperations.Count - 1].ApplyTo(reducedMat);
@@ -424,14 +424,14 @@ namespace RedMath.LinearAlgebra
                 reductionOperations.Add(new MultiplyRowByScalar<T>(col - rowOffset, reducedMat._definingArray[col - rowOffset, col].MultiplicativeInverse));
                 reductionOperations[reductionOperations.Count - 1].ApplyTo(reducedMat);
 
-                reducedMat._definingArray[col - rowOffset, col] = _fieldOne.Clone(); // This line is in place to eliminate the possibility of rounding errors
+                reducedMat._definingArray[col - rowOffset, col] = Field<T>.One; // This line is in place to eliminate the possibility of rounding errors
 
                 for (int row = col + 1 - rowOffset; row < reducedMat.Rows; row++)
                 {
                     reductionOperations.Add(new AddRowMultiple<T>(col - rowOffset, row, reducedMat._definingArray[row, col].AdditiveInverse));
                     reductionOperations[reductionOperations.Count - 1].ApplyTo(reducedMat);
 
-                    reducedMat._definingArray[row, col] = _fieldZero.Clone(); // This line is in place to eliminate the possibility of rounding errors
+                    reducedMat._definingArray[row, col] = Field<T>.Zero; // This line is in place to eliminate the possibility of rounding errors
                 }
             }
 
@@ -452,7 +452,7 @@ namespace RedMath.LinearAlgebra
                 isZeroRow = true;
                 for (int col = 0; col < reducedEchelonFormMatrix.Columns; col++)
                 {
-                    if (reducedEchelonFormMatrix._definingArray[baseRow, col] == _fieldOne)
+                    if (reducedEchelonFormMatrix._definingArray[baseRow, col] == Field<T>.One)
                     {
                         entryIndex = col;
                         isZeroRow = false;
@@ -470,7 +470,7 @@ namespace RedMath.LinearAlgebra
                     reductionOperations.Add(new AddRowMultiple<T>(baseRow, currentRow, reducedEchelonFormMatrix._definingArray[currentRow, entryIndex].AdditiveInverse));
                     reductionOperations[reductionOperations.Count - 1].ApplyTo(reducedEchelonFormMatrix);
 
-                    reducedEchelonFormMatrix._definingArray[currentRow, entryIndex] = _fieldZero.Clone(); // This line is in place to eliminate the possibility of rounding errors
+                    reducedEchelonFormMatrix._definingArray[currentRow, entryIndex] = Field<T>.Zero; // This line is in place to eliminate the possibility of rounding errors
                 }
             }
 
@@ -496,7 +496,7 @@ namespace RedMath.LinearAlgebra
 
             for (int i = 0; i < Rows; i++)
             {
-                inverseMat._definingArray[i, i] = _fieldOne.Clone();
+                inverseMat._definingArray[i, i] = Field<T>.One;
             }
 
             foreach (var op in ReducedEchelonFormReductionOperations)
@@ -520,12 +520,12 @@ namespace RedMath.LinearAlgebra
             {
                 for (int col = 0; col < Width && isIdentity; col++)
                 {
-                    if (col == row && _definingArray[row, col] != _fieldOne)
+                    if (col == row && _definingArray[row, col] != Field<T>.One)
                     {
                         isIdentity = false;
                         break;
                     }
-                    else if (col != row && _definingArray[row, col] != _fieldZero)
+                    else if (col != row && _definingArray[row, col] != Field<T>.Zero)
                     {
                         isIdentity = false;
                         break;
@@ -552,7 +552,7 @@ namespace RedMath.LinearAlgebra
             {
                 for (int col = row + 1; col < Columns; col++)
                 {
-                    if (_definingArray[row, col] != _fieldZero)
+                    if (_definingArray[row, col] != Field<T>.Zero)
                     {
                         return false;
                     }
@@ -573,7 +573,7 @@ namespace RedMath.LinearAlgebra
             {
                 for (int col = 0; col < row; col++)
                 {
-                    if (_definingArray[row, col] == _fieldZero)
+                    if (_definingArray[row, col] == Field<T>.Zero)
                     {
                         return false;
                     }
@@ -590,7 +590,7 @@ namespace RedMath.LinearAlgebra
 
             for (int i = 0; i < Math.Min(reducedForm.Rows, reducedForm.Columns); i++)
             {
-                if (reducedForm._definingArray[i, i] == _fieldOne)
+                if (reducedForm._definingArray[i, i] == Field<T>.One)
                 {
                     rank++;
                 }
@@ -665,7 +665,7 @@ namespace RedMath.LinearAlgebra
                 int i = ind[0];
                 int j = ind[1];
 
-                T sum = _fieldZero.Clone();
+                T sum = Field<T>.Zero;
 
                 for (int k = 0; k < left.Width; k++)
                 {
@@ -685,13 +685,13 @@ namespace RedMath.LinearAlgebra
                 throw new InvalidOperationException("The matrix and vector given are of incompatible sizes and can't be multiplied.");
             }
 
-            T[] multResult = new T[vec.Dimension];
+            T[] multResult = new T[mat.Height];
 
             multResult.AssignAll(ind =>
             {
                 int i = ind[0];
 
-                T sum = _fieldZero.Clone();
+                T sum = Field<T>.Zero;
 
                 for (int k = 0; k < vec.Dimension; k++)
                 {
@@ -711,13 +711,13 @@ namespace RedMath.LinearAlgebra
                 throw new InvalidOperationException("The vector and matrix given are of incompatible sizes and can't be multiplied.");
             }
 
-            T[] multResult = new T[vec.Dimension];
+            T[] multResult = new T[mat.Width];
 
             multResult.AssignAll(ind =>
             {
                 int j = ind[0];
 
-                T sum = _fieldZero.Clone();
+                T sum = Field<T>.Zero;
 
                 for (int k = 0; k < vec.Dimension; k++)
                 {

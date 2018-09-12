@@ -16,7 +16,7 @@ namespace RedMath.HighPerformance
             }
 
             T[,] temp = new T[left.Height, right.Width];
-            T fieldZero = new T().Zero;
+            T fieldZero = Field<T>.Zero;
 
             Parallel.For(0, left.Height * right.Width, (index) =>
             {

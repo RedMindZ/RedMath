@@ -52,7 +52,7 @@ namespace RedMath.LinearAlgebra
 
             for (int i = 0; i < mat.Height; i++)
             {
-                mat[i, i] = new T().One;
+                mat[i, i] = Field<T>.One;
             }
 
             mat.AppendRowVector(vec.HomogeneousCoordinates);

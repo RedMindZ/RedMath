@@ -15,12 +15,12 @@ namespace RedMath.Gpu
         Func<StructType, StructType, StructType> GetStructMultiplication();
     }
 
-    public interface IGpuStructManager<FieldType, StructType> : IClassStructConverter<FieldType, StructType>, IFieldStruct<StructType> where FieldType : Field<FieldType> where StructType : struct
+    public interface IGpuStructManager<FieldType, StructType> : IClassStructConverter<FieldType, StructType>, IFieldStruct<StructType> where FieldType : Field<FieldType>, new() where StructType : struct
     {
         StructType GetStructDefaultValue();
     }
 
-    public interface IGpuCompatibleField<FieldType, StructType> where FieldType : Field<FieldType> where StructType : struct
+    public interface IGpuCompatibleField<FieldType, StructType> where FieldType : Field<FieldType>, new() where StructType : struct
     {
         IGpuStructManager<FieldType, StructType> GetDefaultGpuStructManager();
     }

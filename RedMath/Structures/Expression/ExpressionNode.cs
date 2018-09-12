@@ -42,7 +42,7 @@ namespace RedMath.Structures.Expression
         }
     }
 
-    public class AddNode<T> : BinaryExpressionNode<T, T, T> where T : Field<T>
+    public class AddNode<T> : BinaryExpressionNode<T, T, T> where T : Field<T>, new()
     {
         public override T Evaluate()
         {
@@ -55,7 +55,7 @@ namespace RedMath.Structures.Expression
         }
     }
 
-    public class MultiplyNode<T> : BinaryExpressionNode<T, T, T> where T : Field<T>
+    public class MultiplyNode<T> : BinaryExpressionNode<T, T, T> where T : Field<T>, new()
     {
         public override T Evaluate()
         {
@@ -68,7 +68,7 @@ namespace RedMath.Structures.Expression
         }
     }
 
-    public class SubtractNode<T> : BinaryExpressionNode<T, T, T> where T : Field<T>
+    public class SubtractNode<T> : BinaryExpressionNode<T, T, T> where T : Field<T>, new()
     {
         public override T Evaluate()
         {
@@ -81,7 +81,7 @@ namespace RedMath.Structures.Expression
         }
     }
 
-    public class DivideNode<T> : BinaryExpressionNode<T, T, T> where T : Field<T>
+    public class DivideNode<T> : BinaryExpressionNode<T, T, T> where T : Field<T>, new()
     {
         public override T Evaluate()
         {

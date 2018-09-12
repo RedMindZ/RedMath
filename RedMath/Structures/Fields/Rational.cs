@@ -41,9 +41,9 @@ namespace RedMath.Structures
 
         public double Value => (double)Numerator / Denominator;
 
-        public override Rational Zero => new Rational(0);
+        protected override Rational _zero => new Rational(0);
 
-        public override Rational One => new Rational(1);
+        protected override Rational _one => new Rational(1);
 
         public override Rational AdditiveInverse => new Rational(-Numerator, Denominator);
 
