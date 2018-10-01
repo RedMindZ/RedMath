@@ -36,6 +36,8 @@ namespace RedMath.Structures
             }
         }
 
+        public F this[int index] { get => Elements[index]; set => Elements[index] = value; }
+
         public override T Add(T other)
         {
             T sum = CreateEmptyVector(Dimension);

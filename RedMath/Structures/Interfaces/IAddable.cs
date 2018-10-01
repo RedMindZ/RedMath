@@ -4,9 +4,10 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace RedMath.Calculus
+namespace RedMath.Structures
 {
-    public interface IParametricallyDifferentiableFunction
+    public interface IAddable<T> where T : IAddable<T>
     {
+        T Add(T other);
     }
 }

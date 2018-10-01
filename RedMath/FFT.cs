@@ -136,8 +136,8 @@ namespace RedMath
 
             int halfLength = data.Length / 2;
 
-            System.Array.Copy(even, data, even.Length);
-            System.Array.Copy(odd, 0, data, halfLength, odd.Length);
+            Array.Copy(even, data, even.Length);
+            Array.Copy(odd, 0, data, halfLength, odd.Length);
 
             Complex ePow;
             Complex t;
@@ -151,36 +151,6 @@ namespace RedMath
             }
 
             return data;
-            /*
-            int sliceSize = 2;
-            int k;
-            int halfLength = data.Length / 2;
-            Complex ePow;
-            Complex t;
-            double Im = -2 * Algebra.PI / data.Length;
-
-            arrangeForTransformation(data);
-
-            while (sliceSize <= data.Length)
-            {
-                k = sliceSize - 1;
-
-                while (k < data.Length)
-                {
-                    halfLength = sliceSize / 2;
-                    /*for (int i = 0; i < halfLength; i++)
-                    {
-                        t = data[i];
-                        ePow = Algebra.Exponent(new Complex(0, Im * i)) * data[i + halfLength];
-                        data[i] = t + ePow;
-                        data[i + halfLength] = t - ePow;
-                    }
-                    combine(data, k - sliceSize + 1, k);
-                    k += sliceSize;
-                }
-
-                sliceSize *= 2;
-            }*/
         }
     }
 }

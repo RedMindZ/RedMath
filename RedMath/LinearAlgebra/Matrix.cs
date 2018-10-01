@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Text;
+using System.Linq;
 
 using RedMath.LinearAlgebra.MatrixOperations;
 using RedMath.Structures;
@@ -11,7 +12,7 @@ namespace RedMath.LinearAlgebra
     public sealed class Matrix<T> where T : Field<T>, new()
     {
         #region Class Fields
-        private T[,] _definingArray;
+        private T[,] _elements;
         private Cache<string> _computationCache = new Cache<string>();
 
         //private static T _fieldZero = new T()._zero;
@@ -19,11 +20,11 @@ namespace RedMath.LinearAlgebra
         #endregion
 
         #region Size Properties
-        public int Height => _definingArray.GetLength(0);
-        public int Width => _definingArray.GetLength(1);
+        public int Height => _elements.GetLength(0);
+        public int Width => _elements.GetLength(1);
 
-        public int Rows => _definingArray.GetLength(0);
-        public int Columns => _definingArray.GetLength(1);
+        public int Rows => _elements.GetLength(0);
+        public int Columns => _elements.GetLength(1);
         #endregion
 
         #region Matrix Properties
@@ -45,7 +46,7 @@ namespace RedMath.LinearAlgebra
             {
                 T[] seq = new T[Math.Min(Height, Width)];
 
-                seq.AssignAll(ind => _definingArray[ind[0], ind[0]].Clone());
+                seq.AssignAll(ind => _elements[ind[0], ind[0]].Clone());
 
                 return seq;
             }
@@ -57,7 +58,7 @@ namespace RedMath.LinearAlgebra
             {
                 T[] seq = new T[Math.Min(Height, Width)];
 
-                seq.AssignAll(ind => _definingArray[seq.Length - ind[0] - 1, ind[0]].Clone());
+                seq.AssignAll(ind => _elements[seq.Length - ind[0] - 1, ind[0]].Clone());
 
                 return seq;
             }
@@ -97,12 +98,12 @@ namespace RedMath.LinearAlgebra
         {
             get
             {
-                return _definingArray[row, col].Clone();
+                return _elements[row, col].Clone();
             }
 
             set
             {
-                _definingArray[row, col] = value.Clone();
+                _elements[row, col] = value.Clone();
 
                 _computationCache.SetAllUpdateStates(true);
             }
@@ -113,23 +114,23 @@ namespace RedMath.LinearAlgebra
 
         public Matrix(int rows, int cols)
         {
-            _definingArray = new T[rows, cols];
+            _elements = new T[rows, cols];
 
-            _definingArray.AssignAll(ind => Field<T>.Zero);
+            _elements.AssignAll(ind => Field<T>.Zero);
 
             InitCache();
         }
 
         public Matrix(T[,] entries)
         {
-            _definingArray = new T[entries.GetLength(0), entries.GetLength(1)];
+            _elements = new T[entries.GetLength(0), entries.GetLength(1)];
 
-            _definingArray.AssignAll(ind => entries[ind[0], ind[1]].Clone());
+            _elements.AssignAll(ind => entries[ind[0], ind[1]].Clone());
 
             InitCache();
         }
 
-        public Matrix(Matrix<T> mat) : this(mat._definingArray) { }
+        public Matrix(Matrix<T> mat) : this(mat._elements) { }
 
         private void InitCache()
         {
@@ -166,7 +167,7 @@ namespace RedMath.LinearAlgebra
                     {
                         if (j != col)
                         {
-                            subMatrix[rowIndex, colIndex] = _definingArray[i, j];
+                            subMatrix[rowIndex, colIndex] = _elements[i, j];
 
                             colIndex++;
                         }
@@ -194,7 +195,7 @@ namespace RedMath.LinearAlgebra
                 {
                     if (i < Rows && j < Columns)
                     {
-                        buffer[i, j] = _definingArray[i, j];
+                        buffer[i, j] = _elements[i, j];
                     }
                     else
                     {
@@ -203,7 +204,7 @@ namespace RedMath.LinearAlgebra
                 }
             }
 
-            _definingArray = buffer;
+            _elements = buffer;
 
             _computationCache.SetAllUpdateStates(true);
         }
@@ -212,9 +213,9 @@ namespace RedMath.LinearAlgebra
         {
             T[,] buffer = new T[Columns, Rows];
 
-            buffer.AssignAll(ind => _definingArray[ind[1], ind[0]]);
+            buffer.AssignAll(ind => _elements[ind[1], ind[0]]);
 
-            _definingArray = buffer;
+            _elements = buffer;
 
             _computationCache.SetAllUpdateStates(true);
         }
@@ -241,16 +242,16 @@ namespace RedMath.LinearAlgebra
         {
             Matrix<T> buffer = new Matrix<T>(Rows + 1, Columns);
 
-            buffer._definingArray.Assign(ind => _definingArray[ind[0], ind[1]], new int[] { Rows, Columns });
+            buffer._elements.Assign(ind => _elements[ind[0], ind[1]], new int[] { Rows, Columns });
 
             if (row.Dimension > buffer.Width)
             {
                 buffer.Resize(buffer.Rows, row.Dimension);
             }
 
-            buffer._definingArray.Assign(ind => row[ind[1]].Clone(), new int[] { buffer.Rows - 1, 0 }, new int[] { buffer.Rows - 1, row.Dimension});
+            buffer._elements.Assign(ind => row[ind[1]].Clone(), new int[] { buffer.Rows - 1, 0 }, new int[] { buffer.Rows - 1, row.Dimension });
 
-            _definingArray = buffer._definingArray;
+            _elements = buffer._elements;
 
             _computationCache.SetAllUpdateStates(true);
         }
@@ -268,7 +269,7 @@ namespace RedMath.LinearAlgebra
 
                 for (int j = 0; j < Columns; j++)
                 {
-                    buffer._definingArray[i, j] = _definingArray[rowIndex, j];
+                    buffer._elements[i, j] = _elements[rowIndex, j];
                 }
 
                 rowIndex++;
@@ -279,9 +280,9 @@ namespace RedMath.LinearAlgebra
                 buffer.Resize(buffer.Rows, row.Dimension);
             }
 
-            buffer._definingArray.Assign(ind => row[ind[1]].Clone(), new int[] { index, 0 }, new int[] { index + 1, row.Dimension });
+            buffer._elements.Assign(ind => row[ind[1]].Clone(), new int[] { index, 0 }, new int[] { index + 1, row.Dimension });
 
-            _definingArray = buffer._definingArray;
+            _elements = buffer._elements;
 
             _computationCache.SetAllUpdateStates(true);
         }
@@ -290,16 +291,16 @@ namespace RedMath.LinearAlgebra
         {
             Matrix<T> buffer = new Matrix<T>(Rows, Columns + 1);
 
-            buffer._definingArray.Assign(ind => _definingArray[ind[0], ind[1]], new int[] { Rows, Columns });
+            buffer._elements.Assign(ind => _elements[ind[0], ind[1]], new int[] { Rows, Columns });
 
             if (col.Dimension > buffer.Height)
             {
                 buffer.Resize(col.Dimension, buffer.Columns);
             }
 
-            buffer._definingArray.Assign(ind => col[ind[0]].Clone(), new int[] { 0, buffer.Columns - 1 }, new int[] { col.Dimension, buffer.Columns });
+            buffer._elements.Assign(ind => col[ind[0]].Clone(), new int[] { 0, buffer.Columns - 1 }, new int[] { col.Dimension, buffer.Columns });
 
-            _definingArray = buffer._definingArray;
+            _elements = buffer._elements;
 
             _computationCache.SetAllUpdateStates(true);
         }
@@ -317,7 +318,7 @@ namespace RedMath.LinearAlgebra
 
                 for (int j = 0; j < Rows; j++)
                 {
-                    buffer._definingArray[j, i] = _definingArray[j, colIndex];
+                    buffer._elements[j, i] = _elements[j, colIndex];
                 }
 
                 colIndex++;
@@ -328,11 +329,50 @@ namespace RedMath.LinearAlgebra
                 buffer.Resize(col.Dimension, buffer.Columns);
             }
 
-            buffer._definingArray.Assign(ind => col[ind[0]].Clone(), new int[] { 0, index }, new int[] { col.Dimension, index + 1 });
+            buffer._elements.Assign(ind => col[ind[0]].Clone(), new int[] { 0, index }, new int[] { col.Dimension, index + 1 });
 
-            _definingArray = buffer._definingArray;
+            _elements = buffer._elements;
 
             _computationCache.SetAllUpdateStates(true);
+        }
+
+        public void AppendMatrixToTheRight(Matrix<T> mat)
+        {
+            _elements = ConcatRows(this, mat)._elements;
+        }
+
+        public void AppendMatrixToTheLeft(Matrix<T> mat)
+        {
+            _elements = ConcatRows(mat, this)._elements;
+        }
+
+        public static Matrix<T> ConcatRows(params Matrix<T>[] matrices)
+        {
+            for (int i = 0; i < matrices.Length; i++)
+            {
+                if (matrices[i].Rows != matrices[0].Rows)
+                {
+                    throw new ArgumentException("All matrices to be concatenated must have the same number of rows.");
+                }
+            }
+
+            T[,] matEntries = new T[matrices[0].Rows, matrices.Sum((mat) => mat.Columns)];
+
+            int columnOffset = 0;
+            for (int i = 0; i < matrices.Length; i++)
+            {
+                for (int j = 0; j < matrices[i].Rows; j++)
+                {
+                    for (int k = 0; k < matrices[i].Columns; k++)
+                    {
+                        matEntries[j, columnOffset + k] = matrices[i][j, k];
+                    }
+                }
+
+                columnOffset += matrices[i].Columns;
+            }
+
+            return new Matrix<T>(matEntries);
         }
 
         public T Minor(int row, int col)
@@ -373,10 +413,10 @@ namespace RedMath.LinearAlgebra
 
             if (Height == 1)
             {
-                return _definingArray[0, 0];
+                return _elements[0, 0];
             }
 
-            T det = Decomposition.LowerMatrix.MainDiagonal.FieldProduct().Multiply(Decomposition.UpperMatrix.MainDiagonal.FieldProduct());
+            T det = Decomposition.LowerMatrix.MainDiagonal.Product().Multiply(Decomposition.UpperMatrix.MainDiagonal.Product());
 
             if (Decomposition.Permutation.Signature == 1)
             {
@@ -400,12 +440,12 @@ namespace RedMath.LinearAlgebra
             for (int col = 0; col < Math.Min(reducedMat.Rows, reducedMat.Columns); col++)
             {
                 isZeroColumn = false;
-                if (reducedMat._definingArray[col - rowOffset, col] == Field<T>.Zero)
+                if (reducedMat._elements[col - rowOffset, col] == Field<T>.Zero)
                 {
                     isZeroColumn = true;
                     for (int row = col + 1 - rowOffset; row < reducedMat.Height; row++)
                     {
-                        if (reducedMat._definingArray[row, col] != Field<T>.Zero)
+                        if (reducedMat._elements[row, col] != Field<T>.Zero)
                         {
                             reductionOperations.Add(new SwapRows<T>(row, col - rowOffset));
                             reductionOperations[reductionOperations.Count - 1].ApplyTo(reducedMat);
@@ -421,17 +461,17 @@ namespace RedMath.LinearAlgebra
                     continue;
                 }
 
-                reductionOperations.Add(new MultiplyRowByScalar<T>(col - rowOffset, reducedMat._definingArray[col - rowOffset, col].MultiplicativeInverse));
+                reductionOperations.Add(new MultiplyRowByScalar<T>(col - rowOffset, reducedMat._elements[col - rowOffset, col].MultiplicativeInverse));
                 reductionOperations[reductionOperations.Count - 1].ApplyTo(reducedMat);
 
-                reducedMat._definingArray[col - rowOffset, col] = Field<T>.One; // This line is in place to eliminate the possibility of rounding errors
+                reducedMat._elements[col - rowOffset, col] = Field<T>.One; // This line is in place to eliminate the possibility of rounding errors
 
                 for (int row = col + 1 - rowOffset; row < reducedMat.Rows; row++)
                 {
-                    reductionOperations.Add(new AddRowMultiple<T>(col - rowOffset, row, reducedMat._definingArray[row, col].AdditiveInverse));
+                    reductionOperations.Add(new AddRowMultiple<T>(col - rowOffset, row, reducedMat._elements[row, col].AdditiveInverse));
                     reductionOperations[reductionOperations.Count - 1].ApplyTo(reducedMat);
 
-                    reducedMat._definingArray[row, col] = Field<T>.Zero; // This line is in place to eliminate the possibility of rounding errors
+                    reducedMat._elements[row, col] = Field<T>.Zero; // This line is in place to eliminate the possibility of rounding errors
                 }
             }
 
@@ -452,7 +492,7 @@ namespace RedMath.LinearAlgebra
                 isZeroRow = true;
                 for (int col = 0; col < reducedEchelonFormMatrix.Columns; col++)
                 {
-                    if (reducedEchelonFormMatrix._definingArray[baseRow, col] == Field<T>.One)
+                    if (reducedEchelonFormMatrix._elements[baseRow, col] == Field<T>.One)
                     {
                         entryIndex = col;
                         isZeroRow = false;
@@ -467,10 +507,10 @@ namespace RedMath.LinearAlgebra
 
                 for (int currentRow = 0; currentRow < baseRow; currentRow++)
                 {
-                    reductionOperations.Add(new AddRowMultiple<T>(baseRow, currentRow, reducedEchelonFormMatrix._definingArray[currentRow, entryIndex].AdditiveInverse));
+                    reductionOperations.Add(new AddRowMultiple<T>(baseRow, currentRow, reducedEchelonFormMatrix._elements[currentRow, entryIndex].AdditiveInverse));
                     reductionOperations[reductionOperations.Count - 1].ApplyTo(reducedEchelonFormMatrix);
 
-                    reducedEchelonFormMatrix._definingArray[currentRow, entryIndex] = Field<T>.Zero; // This line is in place to eliminate the possibility of rounding errors
+                    reducedEchelonFormMatrix._elements[currentRow, entryIndex] = Field<T>.Zero; // This line is in place to eliminate the possibility of rounding errors
                 }
             }
 
@@ -496,7 +536,7 @@ namespace RedMath.LinearAlgebra
 
             for (int i = 0; i < Rows; i++)
             {
-                inverseMat._definingArray[i, i] = Field<T>.One;
+                inverseMat._elements[i, i] = Field<T>.One;
             }
 
             foreach (var op in ReducedEchelonFormReductionOperations)
@@ -520,12 +560,12 @@ namespace RedMath.LinearAlgebra
             {
                 for (int col = 0; col < Width && isIdentity; col++)
                 {
-                    if (col == row && _definingArray[row, col] != Field<T>.One)
+                    if (col == row && _elements[row, col] != Field<T>.One)
                     {
                         isIdentity = false;
                         break;
                     }
-                    else if (col != row && _definingArray[row, col] != Field<T>.Zero)
+                    else if (col != row && _elements[row, col] != Field<T>.Zero)
                     {
                         isIdentity = false;
                         break;
@@ -552,7 +592,7 @@ namespace RedMath.LinearAlgebra
             {
                 for (int col = row + 1; col < Columns; col++)
                 {
-                    if (_definingArray[row, col] != Field<T>.Zero)
+                    if (_elements[row, col] != Field<T>.Zero)
                     {
                         return false;
                     }
@@ -573,7 +613,7 @@ namespace RedMath.LinearAlgebra
             {
                 for (int col = 0; col < row; col++)
                 {
-                    if (_definingArray[row, col] == Field<T>.Zero)
+                    if (_elements[row, col] == Field<T>.Zero)
                     {
                         return false;
                     }
@@ -590,7 +630,7 @@ namespace RedMath.LinearAlgebra
 
             for (int i = 0; i < Math.Min(reducedForm.Rows, reducedForm.Columns); i++)
             {
-                if (reducedForm._definingArray[i, i] == Field<T>.One)
+                if (reducedForm._elements[i, i] == Field<T>.One)
                 {
                     rank++;
                 }
@@ -609,7 +649,7 @@ namespace RedMath.LinearAlgebra
 
             T[,] buffer = new T[left.Height, left.Width];
 
-            buffer.AssignAll(ind => left._definingArray[ind[0], ind[1]] + right._definingArray[ind[0], ind[1]]);
+            buffer.AssignAll(ind => left._elements[ind[0], ind[1]] + right._elements[ind[0], ind[1]]);
 
             return new Matrix<T>(buffer);
         }
@@ -623,7 +663,7 @@ namespace RedMath.LinearAlgebra
 
             T[,] buffer = new T[left.Height, left.Width];
 
-            buffer.AssignAll(ind => left._definingArray[ind[0], ind[1]] - right._definingArray[ind[0], ind[1]]);
+            buffer.AssignAll(ind => left._elements[ind[0], ind[1]] - right._elements[ind[0], ind[1]]);
 
             return new Matrix<T>(buffer);
         }
@@ -632,7 +672,7 @@ namespace RedMath.LinearAlgebra
         {
             T[,] buffer = new T[mat.Height, mat.Width];
 
-            buffer.AssignAll(ind => -mat._definingArray[ind[0], ind[1]]);
+            buffer.AssignAll(ind => -mat._elements[ind[0], ind[1]]);
 
             return new Matrix<T>(buffer);
         }
@@ -641,7 +681,7 @@ namespace RedMath.LinearAlgebra
         {
             T[,] buffer = new T[mat.Height, mat.Width];
 
-            buffer.AssignAll(ind => mat._definingArray[ind[0], ind[1]] * scalar);
+            buffer.AssignAll(ind => mat._elements[ind[0], ind[1]] * scalar);
 
             return new Matrix<T>(buffer);
         }
@@ -669,7 +709,7 @@ namespace RedMath.LinearAlgebra
 
                 for (int k = 0; k < left.Width; k++)
                 {
-                    sum += left._definingArray[i, k] * right._definingArray[k, j];
+                    sum += left._elements[i, k] * right._elements[k, j];
                 }
 
                 return sum;
@@ -695,7 +735,7 @@ namespace RedMath.LinearAlgebra
 
                 for (int k = 0; k < vec.Dimension; k++)
                 {
-                    sum += mat._definingArray[i, k] * vec[k];
+                    sum += mat._elements[i, k] * vec[k];
                 }
 
                 return sum;
@@ -721,7 +761,7 @@ namespace RedMath.LinearAlgebra
 
                 for (int k = 0; k < vec.Dimension; k++)
                 {
-                    sum += vec[k] * mat._definingArray[k, j];
+                    sum += vec[k] * mat._elements[k, j];
                 }
 
                 return sum;
@@ -767,7 +807,7 @@ namespace RedMath.LinearAlgebra
             {
                 for (int j = 0; j < Width; j++)
                 {
-                    if (_definingArray[i, j] != other._definingArray[i, j])
+                    if (_elements[i, j] != other._elements[i, j])
                     {
                         return false;
                     }
@@ -785,7 +825,7 @@ namespace RedMath.LinearAlgebra
             {
                 for (int j = 0; j < Width; j++)
                 {
-                    sum += _definingArray[i, j].GetHashCode();
+                    sum += _elements[i, j].GetHashCode();
                 }
             }
 
@@ -803,7 +843,7 @@ namespace RedMath.LinearAlgebra
             {
                 for (int j = 0; j < Columns; j++)
                 {
-                    digits = _definingArray[i, j].ToString().Length;
+                    digits = _elements[i, j].ToString().Length;
 
                     if (digits > charCount[j])
                     {
@@ -821,11 +861,11 @@ namespace RedMath.LinearAlgebra
             {
                 for (int j = 0; j < Columns; j++)
                 {
-                    res.Append(_definingArray[i, j]);
+                    res.Append(_elements[i, j]);
 
                     if (j < Columns - 1)
                     {
-                        digits = _definingArray[i, j].ToString().Length;
+                        digits = _elements[i, j].ToString().Length;
 
                         for (int k = digits; k < charCount[j]; k++)
                         {

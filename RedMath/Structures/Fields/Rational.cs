@@ -27,7 +27,6 @@ namespace RedMath.Structures
             }
         }
 
-
         public Rational ReducedForm
         {
             get
@@ -42,11 +41,9 @@ namespace RedMath.Structures
         public double Value => (double)Numerator / Denominator;
 
         protected override Rational _zero => new Rational(0);
-
         protected override Rational _one => new Rational(1);
 
         public override Rational AdditiveInverse => new Rational(-Numerator, Denominator);
-
         public override Rational MultiplicativeInverse => new Rational(Denominator, Numerator);
 
         public Rational()
@@ -85,40 +82,16 @@ namespace RedMath.Structures
             }
         }
 
-        public override Rational Add(Rational other)
-        {
-            return new Rational(Numerator * other.Denominator + Denominator * other.Numerator, Denominator * other.Denominator).ReducedForm;
-        }
+        public override Rational Add(Rational other) => new Rational(Numerator * other.Denominator + Denominator * other.Numerator, Denominator * other.Denominator).ReducedForm;
+        public override Rational Multiply(Rational other) => new Rational(Numerator * other.Numerator, Denominator * other.Denominator).ReducedForm;
 
-        public override Rational Multiply(Rational other)
-        {
-            return new Rational(Numerator * other.Numerator, Denominator * other.Denominator).ReducedForm;
-        }
+        public override Rational Clone() => new Rational(Numerator, Denominator);
 
-        public override Rational Clone()
-        {
-            return new Rational(Numerator, Denominator);
-        }
+        public static implicit operator Rational(int num) => new Rational(num);
+        public static implicit operator Rational(long num) => new Rational(num);
+        public static implicit operator double(Rational q) => q.Value;
 
-        public static implicit operator Rational(int num)
-        {
-            return new Rational(num);
-        }
-
-        public static implicit operator Rational(long num)
-        {
-            return new Rational(num);
-        }
-
-        public static implicit operator double(Rational q)
-        {
-            return q.Value;
-        }
-
-        public override bool Equals(Rational other)
-        {
-            return Numerator == other.Numerator && Denominator == other.Denominator;
-        }
+        public override bool Equals(Rational other) => Numerator == other.Numerator && Denominator == other.Denominator;
 
         public override string ToString()
         {

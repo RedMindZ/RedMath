@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace RedMath.Structures.LinearSpaces
+namespace RedMath.Structures
 {
     public class RealVector : DynamicDimensionCoordinateSpace<RealVector, Real>
     {

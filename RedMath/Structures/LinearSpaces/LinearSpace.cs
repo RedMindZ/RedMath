@@ -10,7 +10,7 @@ namespace RedMath.Structures
 #pragma warning disable CS0659 // Type overrides Object.Equals(object o) but does not override Object.GetHashCode()
 #pragma warning disable CS0661 // Type defines operator == or operator != but does not override Object.GetHashCode()
 
-    public abstract class LinearSpace<T, F> : IEquatable<T> where T : LinearSpace<T, F> where F : Field<F>, new()
+    public abstract class LinearSpace<T, F> : IAddable<T>, ISubtractable<T>, IEquatable<T> where T : LinearSpace<T, F> where F : Field<F>, new()
     {
         protected abstract T Zero { get; }
         protected abstract F UnitScalar { get; }
@@ -54,10 +54,6 @@ namespace RedMath.Structures
         public static bool operator ==(LinearSpace<T, F> left, T right) => left.Equals(right);
         public static bool operator !=(LinearSpace<T, F> left, T right) => !left.Equals(right);
     }
-
-    
-
-    
 
 #pragma warning restore CS0661 // Type defines operator == or operator != but does not override Object.GetHashCode()
 #pragma warning restore CS0659 // Type overrides Object.Equals(object o) but does not override Object.GetHashCode()

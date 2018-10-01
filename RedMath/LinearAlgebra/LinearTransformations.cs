@@ -179,7 +179,7 @@ namespace RedMath.LinearAlgebra
             return translation * lookAt * projMat;*/
             return CreateTranslationMatrix(-from) * CreateLookAtMatrix(from, to, directions) * CreateFullPerspectiveProjectionMatrix(eyeAngle, aspect, near, far, from.Dimension);
         }
-
+        /*
         public static Vector<Real> PerspectivePorjection(Vector<Real> vert, Real eyeAngle, Vector<Real> from, Vector<Real> to, params Vector<Real>[] directions)
         {
             Vector<Real> proj = (CreatePerspectiveViewMatrix(eyeAngle, from, to, directions) * vert.ToRowMatrix()).GetRowVector(0);
@@ -195,8 +195,8 @@ namespace RedMath.LinearAlgebra
             }
 
             return proj;
-        }
-
+        }*/
+        /*
         public static Vector<Real> FullPerspectivePorjection(Vector<Real> vert, Real eyeAngle, Real aspect, Real near, Real far, Vector<Real> from, Vector<Real> to, params Vector<Real>[] directions)
         {
             Vector<Real> proj = (vert.HomogeneousCoordinates.ToRowMatrix() * CreateFullPerspectiveViewMatrix(eyeAngle, aspect, near, far, from, to, directions)).GetRowVector(0);
@@ -212,6 +212,6 @@ namespace RedMath.LinearAlgebra
             }
 
             return proj;
-        }
+        }*/
     }
 }

@@ -1,13 +1,14 @@
 ﻿using RedMath.LinearAlgebra;
 using RedMath.Structures;
 using System;
+using System.Collections.Generic;
 using System.Linq;
 
 namespace RedMath.Utils
 {
     public static class Utilities
     {
-        
+
 
         public static T[] Slice<T>(this T[] source, int fromInclusive, int toExclusive)
         {
@@ -26,28 +27,46 @@ namespace RedMath.Utils
             return res;
         }
 
-        public static T FieldSum<T>(this T[] seq) where T : Field<T>, new()
+        public static T Sum<T>(this IEnumerable<T> sequence) where T : IAddable<T>
         {
-            T sum = Field<T>.Zero;
+            IEnumerator<T> enumerator = sequence.GetEnumerator();
 
-            for (int i = 0; i < seq.Length; i++)
+            if (enumerator.MoveNext())
             {
-                sum += seq[i];
-            }
+                T sum = enumerator.Current;
 
-            return sum;
+                while (enumerator.MoveNext())
+                {
+                    sum = sum.Add(enumerator.Current);
+                }
+
+                return sum;
+            }
+            else
+            {
+                throw new ArgumentException("Can't take the sum of an empty sequence.");
+            }
         }
 
-        public static T FieldProduct<T>(this T[] seq) where T : Field<T>, new()
+        public static T Product<T>(this IEnumerable<T> sequence) where T : IMultiplicable<T>
         {
-            T prod = Field<T>.One;
+            IEnumerator<T> enumerator = sequence.GetEnumerator();
 
-            for (int i = 0; i < seq.Length; i++)
+            if (enumerator.MoveNext())
             {
-                prod = prod.Multiply(seq[i]);
-            }
+                T sum = enumerator.Current;
 
-            return prod;
+                while (enumerator.MoveNext())
+                {
+                    sum = sum.Multiply(enumerator.Current);
+                }
+
+                return sum;
+            }
+            else
+            {
+                throw new ArgumentException("Can't take the product of an empty sequence.");
+            }
         }
 
         public static void AssignAll<T>(this Array arr, T value)

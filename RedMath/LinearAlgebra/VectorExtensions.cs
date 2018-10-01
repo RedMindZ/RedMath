@@ -15,14 +15,14 @@ namespace RedMath.LinearAlgebra
             return Math.Sqrt(Vector<Real>.DotProduct(vec, vec));
         }
 
-        public static Vector<Complex> GetNormalizedVector(this Vector<Complex> vec)
+        /*public static Vector<Complex> GetNormalizedVector(this Vector<Complex> vec)
         {
             return vec / vec.GetMagnitude();
-        }
+        }*/
 
-        public static Complex GetMagnitude(this Vector<Complex> vec)
+        /*public static Complex GetMagnitude(this Vector<Complex> vec)
         {
             return Vector<Complex>.DotProduct(vec, vec).SquareRoot;
-        }
+        }*/
     }
 }

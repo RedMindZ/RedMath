@@ -22,134 +22,17 @@ namespace RedMath.LinearAlgebra
         }
     }
 
-    public class Vector<T> : VectorBase<Vector<T>, T> where T : Field<T>, new()
+    public class Vector<T> : DynamicDimensionCoordinateSpace<Vector<T>, T> where T : Field<T>, new()
     {
-        private T[] components;
-
-        public int Dimension
-        {
-            get
-            {
-                return components.Length;
-            }
-
-            set
-            {
-                if (value < Dimension)
-                {
-                    T[] temp = new T[value];
-
-                    for (int i = 0; i < value; i++)
-                    {
-                        temp[i] = components[i];
-                    }
-
-                    components = temp;
-                }
-
-                if (value > Dimension)
-                {
-                    T[] temp = new T[value];
-
-                    for (int i = 0; i < Dimension; i++)
-                    {
-                        temp[i] = components[i];
-                    }
-
-                    for (int i = Dimension; i < temp.Length; i++)
-                    {
-                        temp[i] = Field<T>.Zero;
-                    }
-
-                    components = temp;
-                }
-            }
-        }
-
-        public override Vector<T> Zero
-        {
-            get
-            {
-                return new Vector<T>(Dimension);
-            }
-        }
-
-        public T X
-        {
-            get
-            {
-                return components[0];
-            }
-
-            set
-            {
-                components[0] = value;
-            }
-        }
-
-        public T Y
-        {
-            get
-            {
-                return components[1];
-            }
-
-            set
-            {
-                components[1] = value;
-            }
-        }
-
-        public T Z
-        {
-            get
-            {
-                return components[2];
-            }
-
-            set
-            {
-                components[2] = value;
-            }
-        }
-
-        public T Last
-        {
-            get
-            {
-                return components[components.Length - 1];
-            }
-
-            set
-            {
-                components[components.Length - 1] = value;
-            }
-        }
-
-        public override Vector<T> AddativeInverse
-        {
-            get
-            {
-                Vector<T> vec = new Vector<T>(components);
-
-                for (int i = 0; i < vec.Dimension; i++)
-                {
-                    vec[i] = vec[i].AdditiveInverse;
-                }
-
-                return vec;
-            }
-        }
-
         public Vector<T> HomogeneousCoordinates
         {
             get
             {
                 T[] comp = new T[Dimension + 1];
 
-                for (int i = 0; i < components.Length; i++)
+                for (int i = 0; i < Elements.Length; i++)
                 {
-                    comp[i] = components[i];
+                    comp[i] = Elements[i];
                 }
 
                 comp[comp.Length - 1] = Field<T>.One;
@@ -158,40 +41,10 @@ namespace RedMath.LinearAlgebra
             }
         }
 
-        public T this[int index]
-        {
-            get
-            {
-                return components[index];
-            }
-
-            set
-            {
-                components[index] = value;
-            }
-        }
-
-        public Vector(int dim)
-        {
-            components = new T[dim];
-
-            for (int i = 0; i < dim; i++)
-            {
-                components[i] = Field<T>.Zero;
-            }
-        }
-
-        public Vector(params T[] comp)
-        {
-            components = new T[comp.Length];
-
-            for (int i = 0; i < comp.Length; i++)
-            {
-                components[i] = comp[i].Clone();
-            }
-        }
-
-        public Vector(Vector<T> other) : this((T[])other) { }
+        public Vector() : base() { }
+        public Vector(int dimension) : base(dimension) { }
+        public Vector(params T[] elements) : base(elements) { }
+        public Vector(Vector<T> other) : base(other.Elements) { }
 
         public T Sum()
         {
@@ -233,7 +86,7 @@ namespace RedMath.LinearAlgebra
         {
             Vector<T> normalVec = new Vector<T>(vec.Dimension - 1);
 
-            if (vec.Last == Field<T>.Zero)
+            if (vec[vec.Elements.Length - 1] == Field<T>.Zero)
             {
                 for (int i = 0; i < normalVec.Dimension; i++)
                 {
@@ -245,7 +98,7 @@ namespace RedMath.LinearAlgebra
 
             for (int i = 0; i < normalVec.Dimension; i++)
             {
-                normalVec[i] = vec[i].Divide(vec.Last);
+                normalVec[i] = vec[i].Divide(vec[vec.Elements.Length - 1]);
             }
 
             return normalVec;
@@ -262,112 +115,11 @@ namespace RedMath.LinearAlgebra
 
             for (int i = 0; i < vectorSum.Dimension; i++)
             {
-                vectorSum[i] = vectorSum[i].Add(components[i]);
+                vectorSum[i] = vectorSum[i].Add(Elements[i]);
                 vectorSum[i] = vectorSum[i].Add(other[i]);
             }
 
             return vectorSum;
-        }
-
-        public override Vector<T> MultiplyByScalar(T scalar)
-        {
-            Vector<T> scaledVector = new Vector<T>(components);
-
-            for (int i = 0; i < scaledVector.Dimension; i++)
-            {
-                scaledVector[i] = scaledVector[i].Multiply(scalar);
-            }
-
-            return scaledVector;
-        }
-
-        public static Vector<T> operator +(Vector<T> left, Vector<T> right)
-        {
-            /*Vector<T> vec = new Vector<T>(Math.Max(a.Dimension, b.Dimension));
-
-            for (int i = 0; i < vec.Dimension; i++)
-            {
-                if (i < a.Dimension)
-                {
-                    vec[i] = vec[i].Add(a[i]);
-                }
-
-                if (i < b.Dimension)
-                {
-                    vec[i] = vec[i].Add(b[i]);
-                }
-            }
-
-            return vec;*/
-
-            return left.Add(right);
-        }
-
-        public static Vector<T> operator -(Vector<T> vec)
-        {
-            return vec.AddativeInverse;
-        }
-
-        public static Vector<T> operator -(Vector<T> left, Vector<T> right)
-        {
-            /*Vector<T> vec = new Vector<T>((int)Math.Max(a.Dimension, b.Dimension));
-
-            for (int i = 0; i < vec.Dimension; i++)
-            {
-                if (i < a.Dimension)
-                {
-                    vec[i] = vec[i].Add(a[i]);
-                }
-
-                if (i < b.Dimension)
-                {
-                    vec[i] = vec[i].Subtract(b[i]);
-                }
-            }
-
-            return vec;*/
-
-            return left.Subtract(right);
-        }
-
-        public static Vector<T> operator *(Vector<T> vec, T scalar)
-        {
-            /*Vector<T> scaledVector = new Vector<T>(vec.components);
-
-            for (int i = 0; i < scaledVector.Dimension; i++)
-            {
-                scaledVector[i] = scaledVector[i].Multiply(scalar);
-            }
-
-            return scaledVector;*/
-
-            return vec.MultiplyByScalar(scalar);
-        }
-
-        public static Vector<T> operator *(T scalar, Vector<T> vec)
-        {
-            /*Vector<T> scaledVector = new Vector<T>(vec.components);
-
-            for (int i = 0; i < scaledVector.Dimension; i++)
-            {
-                scaledVector[i] = scaledVector[i].Multiply(scalar);
-            }
-
-            return scaledVector;*/
-
-            return vec.MultiplyByScalar(scalar);
-        }
-
-        public static Vector<T> operator /(Vector<T> a, T d)
-        {
-            Vector<T> vec = new Vector<T>(a.components);
-
-            for (int i = 0; i < vec.Dimension; i++)
-            {
-                vec[i] = vec[i].Divide(d);
-            }
-
-            return vec;
         }
 
         public static Complex DotProduct(Vector<Complex> a, Vector<Complex> b)
@@ -446,29 +198,6 @@ namespace RedMath.LinearAlgebra
             return sum;
         }
 
-        public static bool operator ==(Vector<T> a, Vector<T> b)
-        {
-            if (a.Dimension != b.Dimension)
-            {
-                return false;
-            }
-
-            for (int i = 0; i < a.Dimension; i++)
-            {
-                if (a[i] != b[i])
-                {
-                    return false;
-                }
-            }
-
-            return true;
-        }
-
-        public static bool operator !=(Vector<T> a, Vector<T> b)
-        {
-            return !(a == b);
-        }
-
         public static implicit operator T[] (Vector<T> vec)
         {
             T[] temp = new T[vec.Dimension];
@@ -479,50 +208,6 @@ namespace RedMath.LinearAlgebra
             }
 
             return temp;
-        }
-
-        public override string ToString()
-        {
-            string res = "(";
-
-            for (int i = 0; i < Dimension; i++)
-            {
-                res += components[i];
-
-                if (i < Dimension - 1)
-                {
-                    res += ", ";
-                }
-            }
-
-            res += ")";
-
-            return res;
-        }
-
-        public override bool Equals(object obj)
-        {
-            if (obj == null || GetType() != obj.GetType())
-            {
-                return false;
-            }
-
-            Vector<T> vec = obj as Vector<T>;
-
-            if (vec.Dimension != this.Dimension)
-            {
-                return false;
-            }
-
-            for (int i = 0; i < vec.Dimension; i++)
-            {
-                if (vec[i] != this[i])
-                {
-                    return false;
-                }
-            }
-
-            return true;
         }
 
         public override int GetHashCode()

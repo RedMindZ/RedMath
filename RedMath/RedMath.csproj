@@ -35,11 +35,24 @@
   <ItemGroup>
     <!-- C# source files -->
     <Compile Include="Algebra.cs" />
-    <Compile Include="Calculus\Function.cs" />
-    <Compile Include="Calculus\IDifferentiableFunction.cs" />
-    <Compile Include="Calculus\IParametricallyDifferentiableFunction.cs" />
-    <Compile Include="Calculus\Monomial.cs" />
-    <Compile Include="Calculus\ParametricFunction.cs" />
+    <Compile Include="Calculus\FunctionBuilders\FDivision.cs" />
+    <Compile Include="Calculus\FunctionBuilders\FMultiplication.cs" />
+    <Compile Include="Calculus\FunctionBuilders\FSubtraction.cs" />
+    <Compile Include="Calculus\FunctionExtensions.cs" />
+    <Compile Include="Calculus\FunctionBuilders\FAddition.cs" />
+    <Compile Include="Calculus\FunctionBuilders\FComposition.cs" />
+    <Compile Include="Calculus\Functions\AbsoluteValue.cs" />
+    <Compile Include="Calculus\Functions\RmmMultiplication.cs" />
+    <Compile Include="Calculus\Functions\LmmMultiplication.cs" />
+    <Compile Include="Calculus\Interfaces\IFunction.cs" />
+    <Compile Include="Calculus\Interfaces\IDifferentiableFunction.cs" />
+    <Compile Include="Calculus\Interfaces\IOptimizableFunction.cs" />
+    <Compile Include="Calculus\Interfaces\IMultivariableVectorValuedFunction.cs" />
+    <Compile Include="Calculus\Interfaces\IVectorValuedFunction.cs" />
+    <Compile Include="Calculus\Functions\Monomial.cs" />
+    <Compile Include="Calculus\Interfaces\IMultivariableFunction.cs" />
+    <Compile Include="Calculus\Optimizers\SGD.cs" />
+    <Compile Include="Calculus\Parameter.cs" />
     <Compile Include="FFT.cs" />
     <Compile Include="Gpu\GpuField.cs" Condition="$(DefineConstants.Contains(GPU_SUPPORT))" />
     <Compile Include="HighPerformance\Cpu\CpuMatrixMultiplication.cs" />
@@ -60,6 +73,10 @@
     <Compile Include="Gpu\GpuReal.cs" Condition="$(DefineConstants.Contains(GPU_SUPPORT))" />
     <Compile Include="Structures\Fields\GF7.cs" />
     <Compile Include="Structures\Fields\GF5.cs" />
+    <Compile Include="Structures\Interfaces\IAddable.cs" />
+    <Compile Include="Structures\Interfaces\IDivisible.cs" />
+    <Compile Include="Structures\Interfaces\IMultiplicable.cs" />
+    <Compile Include="Structures\Interfaces\ISubtractable.cs" />
     <Compile Include="Structures\LinearSpaces\CoordinateSpace.cs" />
     <Compile Include="Structures\LinearSpaces\DynamicDimensionCoordinateSpace.cs" />
     <Compile Include="Structures\LinearSpaces\LinearSpace.cs" />

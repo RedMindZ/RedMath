@@ -6,7 +6,7 @@ namespace RedMath.Structures
 #pragma warning disable CS0659 // Type overrides Object.Equals(object o) but does not override Object.GetHashCode()
 #pragma warning disable CS0661 // Type defines operator == or operator != but does not override Object.GetHashCode()
 
-    public abstract class Field<T> : IEquatable<T> where T : Field<T>, new()
+    public abstract class Field<T> : IAddable<T>, ISubtractable<T>, IMultiplicable<T>, IDivisible<T>, IEquatable<T> where T : Field<T>, new()
     {
         protected abstract T _zero { get; }
         protected abstract T _one { get; }
